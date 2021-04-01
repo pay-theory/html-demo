@@ -1,0 +1,4 @@
+node_modules
+build/*
+shell/formation.*
+formation.yml

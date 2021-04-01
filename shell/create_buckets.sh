@@ -1,0 +1,1 @@
+aws s3api create-bucket --region 'us-east-1' --bucket secure-tags-lib-pipeline-$1

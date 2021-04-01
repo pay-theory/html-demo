@@ -1,0 +1,112 @@
+<html>
+
+    <head>
+        <script src="https://dev.sdk.paytheorystudy.com/aron/index.js"></script>
+        <style>
+            #main,
+            form {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="main">
+            <div>
+                <form>
+                    <div id="pay-theory-credit-card-number"></div>
+                    <div id="pay-theory-credit-card-exp"></div>
+                    <div id="pay-theory-credit-card-cvv"></div>
+                    <div><input id="submit-payment" type="submit" disabled/></div>
+                </form>
+            </div>
+            <div id="result-text" />
+        </div>
+        </div>
+        <script type="text/javascript">
+            // API KEY is required
+            const API_KEY = 'pt-sandbox-dev-f992c4a57b86cb16aefae30d0a450237'
+            const AMOUNT = 5000
+            const BUYER_OPTIONS = {
+                first_name: "Html",
+                last_name: "Demo"
+            }
+            // optionally define custom styles for the input components text
+            const STYLES = {
+                default: {
+                    color: 'black',
+                    fontSize: '14px'
+                },
+                success: {
+                    color: '#5cb85c',
+                    fontSize: '14px'
+                },
+                error: {
+                    color: '#d9534f',
+                    fontSize: '14px'
+                }
+            }
+
+            // optionally provide custom tags to help track purchases
+            const TAGS = { YOUR_TAG_KEY: 'YOUR_TAG_VALUE' }
+            const FEE_MODE = window.paytheory.SURCHARGE
+
+
+            window.paytheory.create(
+                    API_KEY,
+                    STYLES,
+                    TAGS,
+                    FEE_MODE)
+                .then(myCreditCard => {
+                    myCreditCard.mount()
+
+                    // handle callbacks
+                    myCreditCard.readyObserver(ready => {
+                        console.log('ready', ready)
+                        const paymentButton = document.getElementById('submit-payment')
+                        paymentButton
+                            .addEventListener("click", (e) => {
+                                e.preventDefault();
+                                const statusContainer = document.getElementById("result-text");
+                                statusContainer.textContent = "";
+                                statusContainer.appendChild(document.createTextNode("working"));
+                                myCreditCard.initTransaction(AMOUNT, BUYER_OPTIONS);
+                            });
+
+                    })
+
+
+                    // only needed when REQUIRE_CONFIRMATION is false
+                    myCreditCard.transactedObserver(transactionResult => {
+                        const statusContainer = document.getElementById("result-text");
+                        statusContainer.textContent = "";
+                        statusContainer.appendChild(
+                            document.createTextNode(JSON.stringify(transactionResult))
+                        );
+                    })
+
+                    myCreditCard.validObserver(valid => {
+                        const paymentButton = document.getElementById("submit-payment");
+                        console.log("valid client", valid);
+                        if (valid) {
+                            paymentButton.removeAttribute("disabled");
+                        }
+                        else {
+                            paymentButton.setAttribute("disabled", "");
+                        }
+                    })
+
+                    myCreditCard.errorObserver(error => {
+                        const statusContainer = document.getElementById("result-text");
+                        statusContainer.textContent = "";
+                        if (error) {
+                            statusContainer.appendChild(document.createTextNode(error));
+                        }
+                    })
+                })
+        </script>
+    </body>
+
+</html>
