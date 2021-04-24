@@ -95,7 +95,7 @@ Resources:
             - GET
             - HEAD
             - OPTIONS
-          TargetOriginId: paytheory-sdk-html
+          TargetOriginId: !Sub 'paytheory-sdk-example-${Env}'
           CachePolicyId: f07eda0f-b830-4ed7-ba09-0bd5504ca2ff
           OriginRequestPolicyId: d1f5d86b-bc1b-44b9-89e9-2d7720fab3b7
           ViewerProtocolPolicy: redirect-to-https
@@ -112,7 +112,7 @@ Resources:
             OriginPath: !Sub '/html/${Env}'
             Id: !Sub 'paytheory-sdk-example-${Env}'
         ViewerCertificate:
-          AcmCertificateArn: 'arn:aws:acm:us-east-1:291752019718:certificate/930eb628-4e4a-440a-a00b-20928d31d1ad'
+          AcmCertificateArn: 'arn:aws:acm:us-east-1:291752019718:certificate/7047cf13-8334-4a8e-86de-dd1d0043e5bf'
           MinimumProtocolVersion: TLSv1.2_2019
           SslSupportMethod: 'sni-only'
   HTMLExampleRoute53--CAP_ENV--:
