@@ -4,74 +4,80 @@ Parameters:
   Env:
     Type: String
     Description: The environment you're deploying to.   
+  ApiKey:
+    Type: String
+    Description: The API key powering the demo  
 Resources:
-  # HTMLExampleCodeBuild--CAP_ENV--:
-  #   Type: 'AWS::CodeBuild::Project'
-  #   Properties:
-  #     Name: !Sub 'paytheory-html-demo-${Env}'
-  #     Description: A website providing hosted fields for Pay Theory SDK
-  #     ServiceRole: 'arn:aws:iam::291752019718:role/pay-theory-code-builder'
-  #     Artifacts:
-  #       Type: no_artifacts
-  #     Environment:
-  #       Type: LINUX_CONTAINER
-  #       ComputeType: BUILD_GENERAL1_SMALL
-  #       Image: 'aws/codebuild/standard:5.0'
-  #       EnvironmentVariables:
-  #         - Name: ENVIRONMENT
-  #           Type: PLAINTEXT
-  #           Value: !Sub '${Env}'
-  #     Source:
-  #       Location: >-
-  #         https://git-codecommit.us-east-1.amazonaws.com/v1/repos/html-demo
-  #       Type: CODECOMMIT
-  #       BuildSpec: buildspec.yml
-  #     SourceVersion: !Sub 'refs/heads/${Env}'
-  #     TimeoutInMinutes: 10
-  # HTMLExamplePipeline--CAP_ENV--:
-  #   DependsOn:
-  #     - HTMLExampleCodeBuild--CAP_ENV--
-  #   Type: 'AWS::CodePipeline::Pipeline'
-  #   Properties:
-  #     Name: !Sub 'paytheory-html-demo-${Env}'
-  #     RoleArn: >-
-  #       arn:aws:iam::291752019718:role/service-role/AWSCodePipelineServiceRole-paytheory
-  #     Stages:
-  #       - Name: Source
-  #         Actions:
-  #           - Name: SourceAction
-  #             ActionTypeId:
-  #               Category: Source
-  #               Owner: AWS
-  #               Version: 1
-  #               Provider: CodeCommit
-  #             OutputArtifacts:
-  #               - Name: SourceArtifact
-  #             Configuration:
-  #               PollForSourceChanges: false
-  #               BranchName: !Sub '${Env}'
-  #               RepositoryName: html-demo
-  #             RunOrder: 1
-  #       - Name: Build
-  #         Actions:
-  #           - Name: BuildAction
-  #             Region: us-east-1
-  #             Namespace: BuildVariables
-  #             InputArtifacts:
-  #               - Name: SourceArtifact
-  #             OutputArtifacts:
-  #               - Name: BuildArtifact
-  #             ActionTypeId:
-  #               Category: Build
-  #               Owner: AWS
-  #               Version: 1
-  #               Provider: CodeBuild
-  #             Configuration:
-  #               ProjectName: !Sub 'paytheory-html-demo-${Env}'
-  #             RunOrder: 1
-  #     ArtifactStore:
-  #       Type: S3
-  #       Location: paytheory-static-deployment
+  HTMLExampleCodeBuild--CAP_ENV--:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Sub 'paytheory-html-demo-${Env}'
+      Description: A website providing hosted fields for Pay Theory SDK
+      ServiceRole: 'arn:aws:iam::291752019718:role/pay-theory-code-builder'
+      Artifacts:
+        Type: no_artifacts
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: 'aws/codebuild/standard:5.0'
+        EnvironmentVariables:
+          - Name: REACT_APP_ENVIRONMENT
+            Type: PLAINTEXT
+            Value: !Sub '${Env}'
+          - Name: API_KEY
+            Type: PLAINTEXT
+            Value: !Sub '${ApiKey}'
+      Source:
+        Location: >-
+          https://git-codecommit.us-east-1.amazonaws.com/v1/repos/html-demo
+        Type: CODECOMMIT
+        BuildSpec: buildspec.yml
+      SourceVersion: !Sub 'refs/heads/${Env}'
+      TimeoutInMinutes: 10
+  HTMLExamplePipeline--CAP_ENV--:
+    DependsOn:
+      - HTMLExampleCodeBuild--CAP_ENV--
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+      Name: !Sub 'paytheory-html-demo-${Env}'
+      RoleArn: >-
+        arn:aws:iam::291752019718:role/service-role/AWSCodePipelineServiceRole-paytheory
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: 1
+                Provider: CodeCommit
+              OutputArtifacts:
+                - Name: SourceArtifact
+              Configuration:
+                PollForSourceChanges: false
+                BranchName: !Sub '${Env}'
+                RepositoryName: html-demo
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: BuildAction
+              Region: us-east-1
+              Namespace: BuildVariables
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: BuildArtifact
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Sub 'paytheory-html-demo-${Env}'
+              RunOrder: 1
+      ArtifactStore:
+        Type: S3
+        Location: paytheory-static-deployment
   HTMLExampleCloudFront--CAP_ENV--:
     Type: 'AWS::CloudFront::Distribution'
     Properties:
