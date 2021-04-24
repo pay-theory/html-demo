@@ -1,0 +1,19 @@
+{
+  "name": "html-demo",
+  "version": "1.0.0",
+  "description": "a demonstration of Pay Theory's JavaScript SDK in simple HTML",
+  "main": "index.html",
+  "scripts": {
+    "build": "sh shell/build_env.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pay-theory/html-demo.git"
+  },
+  "author": "Aron Price",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pay-theory/html-demo/issues"
+  },
+  "homepage": "https://github.com/pay-theory/html-demo#readme"
+}

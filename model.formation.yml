@@ -3,92 +3,81 @@ Description: Secure Tags Library Deployment
 Parameters:
   Env:
     Type: String
-    Description: The environment you're deploying to.
+    Description: The environment you're deploying to.   
 Resources:
-  S3Bucket:
-    Type: 'AWS::S3::Bucket'
-    Properties:
-      AccessControl: PublicRead
-      BucketName: !Sub 'secure-tags-lib-${Env}'
-      MetricsConfigurations:
-        - Id: EntireBucket
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: index.html
-    DeletionPolicy: Retain
-  SecureTagsLibCodeBuild--CAP_ENV--:
-    Type: 'AWS::CodeBuild::Project'
-    Properties:
-      Name: !Sub 'paytheory-secure-tags-lib-${Env}'
-      Description: A website providing hosted fields for Pay Theory SDK
-      ServiceRole: 'arn:aws:iam::291752019718:role/pay-theory-code-builder'
-      Artifacts:
-        Type: no_artifacts
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: 'aws/codebuild/standard:5.0'
-        EnvironmentVariables:
-          - Name: REACT_APP_ENVIRONMENT
-            Type: PLAINTEXT
-            Value: !Sub '${Env}'
-      Source:
-        Location: >-
-          https://git-codecommit.us-east-1.amazonaws.com/v1/repos/secure-tags-lib
-        Type: CODECOMMIT
-        BuildSpec: buildspec.yml
-      SourceVersion: !Sub 'refs/heads/${Env}'
-      TimeoutInMinutes: 10
-  SecureTagsLibPipeline--CAP_ENV--:
-    DependsOn:
-      - SecureTagsLibCodeBuild--CAP_ENV--
-    Type: 'AWS::CodePipeline::Pipeline'
-    Properties:
-      Name: !Sub 'paytheory-secure-tags-lib-${Env}'
-      RoleArn: >-
-        arn:aws:iam::291752019718:role/service-role/AWSCodePipelineServiceRole-paytheory
-      Stages:
-        - Name: Source
-          Actions:
-            - Name: SourceAction
-              ActionTypeId:
-                Category: Source
-                Owner: AWS
-                Version: 1
-                Provider: CodeCommit
-              OutputArtifacts:
-                - Name: SourceArtifact
-              Configuration:
-                PollForSourceChanges: false
-                BranchName: !Sub '${Env}'
-                RepositoryName: secure-tags-lib
-              RunOrder: 1
-        - Name: Build
-          Actions:
-            - Name: BuildAction
-              Region: us-east-1
-              Namespace: BuildVariables
-              InputArtifacts:
-                - Name: SourceArtifact
-              OutputArtifacts:
-                - Name: BuildArtifact
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: 1
-                Provider: CodeBuild
-              Configuration:
-                ProjectName: !Sub 'paytheory-secure-tags-lib-${Env}'
-              RunOrder: 1
-      ArtifactStore:
-        Type: S3
-        Location: paytheory-static-deployment
-  SecureTagsLibCloudFront--CAP_ENV--:
+  # HTMLExampleCodeBuild--CAP_ENV--:
+  #   Type: 'AWS::CodeBuild::Project'
+  #   Properties:
+  #     Name: !Sub 'paytheory-html-demo-${Env}'
+  #     Description: A website providing hosted fields for Pay Theory SDK
+  #     ServiceRole: 'arn:aws:iam::291752019718:role/pay-theory-code-builder'
+  #     Artifacts:
+  #       Type: no_artifacts
+  #     Environment:
+  #       Type: LINUX_CONTAINER
+  #       ComputeType: BUILD_GENERAL1_SMALL
+  #       Image: 'aws/codebuild/standard:5.0'
+  #       EnvironmentVariables:
+  #         - Name: ENVIRONMENT
+  #           Type: PLAINTEXT
+  #           Value: !Sub '${Env}'
+  #     Source:
+  #       Location: >-
+  #         https://git-codecommit.us-east-1.amazonaws.com/v1/repos/html-demo
+  #       Type: CODECOMMIT
+  #       BuildSpec: buildspec.yml
+  #     SourceVersion: !Sub 'refs/heads/${Env}'
+  #     TimeoutInMinutes: 10
+  # HTMLExamplePipeline--CAP_ENV--:
+  #   DependsOn:
+  #     - HTMLExampleCodeBuild--CAP_ENV--
+  #   Type: 'AWS::CodePipeline::Pipeline'
+  #   Properties:
+  #     Name: !Sub 'paytheory-html-demo-${Env}'
+  #     RoleArn: >-
+  #       arn:aws:iam::291752019718:role/service-role/AWSCodePipelineServiceRole-paytheory
+  #     Stages:
+  #       - Name: Source
+  #         Actions:
+  #           - Name: SourceAction
+  #             ActionTypeId:
+  #               Category: Source
+  #               Owner: AWS
+  #               Version: 1
+  #               Provider: CodeCommit
+  #             OutputArtifacts:
+  #               - Name: SourceArtifact
+  #             Configuration:
+  #               PollForSourceChanges: false
+  #               BranchName: !Sub '${Env}'
+  #               RepositoryName: html-demo
+  #             RunOrder: 1
+  #       - Name: Build
+  #         Actions:
+  #           - Name: BuildAction
+  #             Region: us-east-1
+  #             Namespace: BuildVariables
+  #             InputArtifacts:
+  #               - Name: SourceArtifact
+  #             OutputArtifacts:
+  #               - Name: BuildArtifact
+  #             ActionTypeId:
+  #               Category: Build
+  #               Owner: AWS
+  #               Version: 1
+  #               Provider: CodeBuild
+  #             Configuration:
+  #               ProjectName: !Sub 'paytheory-html-demo-${Env}'
+  #             RunOrder: 1
+  #     ArtifactStore:
+  #       Type: S3
+  #       Location: paytheory-static-deployment
+  HTMLExampleCloudFront--CAP_ENV--:
     Type: 'AWS::CloudFront::Distribution'
     Properties:
       DistributionConfig:
         Aliases:
-          - !Sub '${Env}.tags.static.paytheorystudy.com'
+          - !Sub '${Env}.html.example.paytheorystudy.com'
         CustomErrorResponses:
           -
             ErrorCachingMinTTL: 10
@@ -100,12 +89,12 @@ Resources:
             - GET
             - HEAD
             - OPTIONS
-          TargetOriginId: !Sub 'secure-tags-lib-${Env}'
+          TargetOriginId: paytheory-sdk-html
           CachePolicyId: f07eda0f-b830-4ed7-ba09-0bd5504ca2ff
           OriginRequestPolicyId: d1f5d86b-bc1b-44b9-89e9-2d7720fab3b7
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
-        DefaultRootObject: index.html
+        DefaultRootObject: /index.html
         IPV6Enabled: true
         Enabled: true
         Origins:
@@ -113,18 +102,19 @@ Resources:
               OriginProtocolPolicy: 'https-only'
               OriginSSLProtocols:
                 - TLSv1.2
-            DomainName: !Sub 'secure-tags-lib-${Env}.s3-website.us-east-2.amazonaws.com'
-            Id: !Sub 'secure-tags-lib-${Env}'
+            DomainName: paytheory-sdk-example.s3-website-us-east-1.amazonaws.com
+            OriginPath: !Sub '/html/${Env}'
+            Id: !Sub 'paytheory-sdk-example-${Env}'
         ViewerCertificate:
           AcmCertificateArn: 'arn:aws:acm:us-east-1:291752019718:certificate/930eb628-4e4a-440a-a00b-20928d31d1ad'
           MinimumProtocolVersion: TLSv1.2_2019
           SslSupportMethod: 'sni-only'
-  SecureTagsLibRoute53--CAP_ENV--:
+  HTMLExampleRoute53--CAP_ENV--:
     Type: 'AWS::Route53::RecordSet'
     Properties:
       HostedZoneId : 'Z07098583EY0K7E77N5DU'
-      Name: !Sub '${Env}.tags.static.paytheorystudy.com'
+      Name: !Sub '${Env}.html.example.paytheorystudy.com'
       Type: 'CNAME'
       ResourceRecords:
-        - Fn::GetAtt: [ SecureTagsLibCloudFront--CAP_ENV--, DomainName ]
+        - Fn::GetAtt: [ HTMLExampleCloudFront--CAP_ENV--, DomainName ]
       TTL: '300'

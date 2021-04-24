@@ -1,4 +1,3 @@
-node_modules
-build/*
+public/html/*
 shell/formation.*
 formation.yml

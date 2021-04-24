@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <script src="https://dev.sdk.paytheorystudy.com/aron/index.js"></script>
+        <script src="TEMPLATE_URL"></script>
         <style>
             #main,
             form {
@@ -16,10 +16,7 @@
         <div id="main">
             <div>
                 <form>
-                    <div id="pay-theory-ach-account-name"></div>
-                    <div id="pay-theory-ach-account-number"></div>
-                    <div id="pay-theory-ach-account-type"></div>
-                    <div id="pay-theory-ach-bank-code"></div>
+                    <div id="pay-theory-credit-card"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -28,7 +25,7 @@
         </div>
         <script type="text/javascript">
             // API KEY is required
-            const API_KEY = 'pt-sandbox-dev-f992c4a57b86cb16aefae30d0a450237'
+            const API_KEY = 'TEMPLATE_API_KEY'
             const AMOUNT = 5000
             const BUYER_OPTIONS = {
                 first_name: "Html",
@@ -51,7 +48,10 @@
             }
 
             // optionally provide custom tags to help track purchases
-            const TAGS = { YOUR_TAG_KEY: 'YOUR_TAG_VALUE' }
+            const TAGS = {
+                DEMO_ENVIRONMENT: 'TEMPLATE_ENVIRONMENT',
+                DEMO_PAGE: 'credit-card'
+            }
             const FEE_MODE = window.paytheory.SURCHARGE
 
 
@@ -59,7 +59,8 @@
                     API_KEY,
                     STYLES,
                     TAGS,
-                    FEE_MODE)
+                    FEE_MODE,
+                    'TEMPLATE_ENVIRONMENT')
                 .then(myCreditCard => {
                     myCreditCard.mount()
 
