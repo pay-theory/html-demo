@@ -100,7 +100,6 @@ Resources:
           OriginRequestPolicyId: d1f5d86b-bc1b-44b9-89e9-2d7720fab3b7
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
-        DefaultRootObject: /index.html
         IPV6Enabled: true
         Enabled: true
         Origins:
