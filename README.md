@@ -15,7 +15,7 @@ enter values for each environment variable set at top of file
 
 ```bash
 cp shell/model.formation.sh shell/formation.your-branch-name.sh
-sed 's/--CAP_ENV--/YourBranchName/g' model.formation.yml > formation.yml
+sed 's/--CAP_ENV--/YourBranchName/g' model.formation.yml > formation.your-branch-name.yml
 sh shell/formation.your-branch-name.sh
 ```
 
