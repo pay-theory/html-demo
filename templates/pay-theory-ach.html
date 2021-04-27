@@ -27,8 +27,11 @@
         </div>
         </div>
         <script type="text/javascript">
+            const urlParams = new URLSearchParams(window.location.search);
+            const myParam = urlParams.get('key');
+
             // API KEY is required
-            const API_KEY = 'TEMPLATE_API_KEY'
+            const API_KEY = myParam ? myParam : 'TEMPLATE_API_KEY'
             const AMOUNT = 5000
             const BUYER_OPTIONS = {
                 first_name: "Html",
