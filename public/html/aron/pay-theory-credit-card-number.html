@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <script src="TEMPLATE_URL"></script>
+        <script src=""></script>
         <style>
             #main,
             form {
@@ -16,10 +16,9 @@
         <div id="main">
             <div>
                 <form>
-                    <div id="pay-theory-ach-account-name"></div>
-                    <div id="pay-theory-ach-account-number"></div>
-                    <div id="pay-theory-ach-account-type"></div>
-                    <div id="pay-theory-ach-bank-code"></div>
+                    <div id="pay-theory-credit-card-number"></div>
+                    <div id="pay-theory-credit-card-exp"></div>
+                    <div id="pay-theory-credit-card-cvv"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -53,8 +52,8 @@
 
             // optionally provide custom tags to help track purchases
             const TAGS = {
-                DEMO_ENVIRONMENT: 'TEMPLATE_ENVIRONMENT',
-                DEMO_PAGE: 'credit-card'
+                DEMO_ENVIRONMENT: 'aron',
+                DEMO_PAGE: 'credit-card-number'
             }
             const FEE_MODE = window.paytheory.SURCHARGE
 
@@ -64,7 +63,7 @@
                     STYLES,
                     TAGS,
                     FEE_MODE,
-                    'TEMPLATE_ENVIRONMENT')
+                    'aron')
                 .then(myCreditCard => {
                     myCreditCard.mount()
 

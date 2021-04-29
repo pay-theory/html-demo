@@ -14,9 +14,9 @@ edit the file created as *shell/formation.your-branch-name.sh*
 enter values for each environment variable set at top of file
 
 ```bash
-cp shell/model.formation.sh shell/formation.your-branch-name.sh
-sed 's/--CAP_ENV--/YourBranchName/g' model.formation.yml > formation.your-branch-name.yml
-sh shell/formation.your-branch-name.sh
+sh shell/formation.sh your-branch-name
+sh shell/build_env.sh your-branch-name
+sh shell/deploy.sh
 ```
 
 ## Manual update deployment of project code

@@ -3,12 +3,9 @@ Description: Secure Tags Library Deployment
 Parameters:
   Env:
     Type: String
-    Description: The environment you're deploying to.   
-  ApiKey:
-    Type: String
-    Description: The API key powering the demo  
+    Description: The environment you're deploying to. 
 Resources:
-  HTMLExampleCodeBuildOblingo:
+  HTMLExampleCodeBuild:
     Type: 'AWS::CodeBuild::Project'
     Properties:
       Name: !Sub 'paytheory-html-demo-${Env}'
@@ -24,9 +21,6 @@ Resources:
           - Name: REACT_APP_ENVIRONMENT
             Type: PLAINTEXT
             Value: !Sub '${Env}'
-          - Name: API_KEY
-            Type: PLAINTEXT
-            Value: !Sub '${ApiKey}'
       Source:
         Location: >-
           https://git-codecommit.us-east-1.amazonaws.com/v1/repos/html-demo
@@ -34,9 +28,9 @@ Resources:
         BuildSpec: buildspec.yml
       SourceVersion: !Sub 'refs/heads/${Env}'
       TimeoutInMinutes: 10
-  HTMLExamplePipelineOblingo:
+  HTMLExamplePipeline:
     DependsOn:
-      - HTMLExampleCodeBuildOblingo
+      - HTMLExampleCodeBuild
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
       Name: !Sub 'paytheory-html-demo-${Env}'
@@ -78,7 +72,7 @@ Resources:
       ArtifactStore:
         Type: S3
         Location: paytheory-static-deployment
-  HTMLExampleCloudFrontOblingo:
+  HTMLExampleCloudFront:
     Type: 'AWS::CloudFront::Distribution'
     Properties:
       DistributionConfig:
@@ -114,12 +108,12 @@ Resources:
           AcmCertificateArn: 'arn:aws:acm:us-east-1:291752019718:certificate/7047cf13-8334-4a8e-86de-dd1d0043e5bf'
           MinimumProtocolVersion: TLSv1.2_2019
           SslSupportMethod: 'sni-only'
-  HTMLExampleRoute53Oblingo:
+  HTMLExampleRoute53:
     Type: 'AWS::Route53::RecordSet'
     Properties:
       HostedZoneId : 'Z07098583EY0K7E77N5DU'
       Name: !Sub '${Env}.html.example.paytheorystudy.com'
       Type: 'CNAME'
       ResourceRecords:
-        - Fn::GetAtt: [ HTMLExampleCloudFrontOblingo, DomainName ]
+        - Fn::GetAtt: [ HTMLExampleCloudFront, DomainName ]
       TTL: '300'

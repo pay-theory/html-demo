@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <script src="TEMPLATE_URL"></script>
+        <script src=""></script>
         <style>
             #main,
             form {
@@ -53,7 +53,7 @@
 
             // optionally provide custom tags to help track purchases
             const TAGS = {
-                DEMO_ENVIRONMENT: 'TEMPLATE_ENVIRONMENT',
+                DEMO_ENVIRONMENT: 'aron',
                 DEMO_PAGE: 'credit-card'
             }
             const FEE_MODE = window.paytheory.SURCHARGE
@@ -64,7 +64,7 @@
                     STYLES,
                     TAGS,
                     FEE_MODE,
-                    'TEMPLATE_ENVIRONMENT')
+                    'aron')
                 .then(myCreditCard => {
                     myCreditCard.mount()
 

@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <script src="TEMPLATE_URL"></script>
+        <script src=""></script>
         <style>
             #main,
             form {
@@ -16,10 +16,7 @@
         <div id="main">
             <div>
                 <form>
-                    <div id="pay-theory-ach-account-name"></div>
-                    <div id="pay-theory-ach-account-number"></div>
-                    <div id="pay-theory-ach-account-type"></div>
-                    <div id="pay-theory-ach-bank-code"></div>
+                    <div id="pay-theory-credit-card"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -27,8 +24,8 @@
         </div>
         </div>
         <script type="text/javascript">
-            const urlParams = new URLSearchParams(window.location.search)
             // API KEY is required
+            const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('apiKey') ? urlParams.get('apiKey') : 'NO_API_KEY_PROVIDED'
             const AMOUNT = 5000
             const BUYER_OPTIONS = {
@@ -53,7 +50,7 @@
 
             // optionally provide custom tags to help track purchases
             const TAGS = {
-                DEMO_ENVIRONMENT: 'TEMPLATE_ENVIRONMENT',
+                DEMO_ENVIRONMENT: 'aron',
                 DEMO_PAGE: 'credit-card'
             }
             const FEE_MODE = window.paytheory.SURCHARGE
@@ -64,7 +61,7 @@
                     STYLES,
                     TAGS,
                     FEE_MODE,
-                    'TEMPLATE_ENVIRONMENT')
+                    'aron')
                 .then(myCreditCard => {
                     myCreditCard.mount()
 
