@@ -1,0 +1,120 @@
+{
+
+    "CallerReference": "db1492dc-9992-7ffc-30e0-082c66696e94",
+    "Aliases": {
+        "Quantity": 1,
+        "Items": [
+            "zippslip.html.example.paytheorystudy.com"
+        ]
+    },
+    "DefaultRootObject": "",
+    "Origins": {
+        "Quantity": 1,
+        "Items": [{
+            "Id": "paytheory-sdk-example-zippslip",
+            "DomainName": "paytheory-sdk-example.s3-website-us-east-1.amazonaws.com",
+            "OriginPath": "/html/zippslip",
+            "CustomHeaders": {
+                "Quantity": 1,
+                "Items": [{
+                    "HeaderName": "custom",
+                    "HeaderValue": "header"
+                }]
+            },
+            "CustomOriginConfig": {
+                "HTTPPort": 80,
+                "HTTPSPort": 443,
+                "OriginProtocolPolicy": "https-only",
+                "OriginSslProtocols": {
+                    "Quantity": 1,
+                    "Items": [
+                        "TLSv1.2"
+                    ]
+                },
+                "OriginReadTimeout": 30,
+                "OriginKeepaliveTimeout": 5
+            },
+            "ConnectionAttempts": 3,
+            "ConnectionTimeout": 10,
+            "OriginShield": {
+                "Enabled": false
+            }
+        }]
+    },
+    "OriginGroups": {
+        "Quantity": 0
+    },
+    "DefaultCacheBehavior": {
+        "TargetOriginId": "paytheory-sdk-example-zippslip",
+        "TrustedSigners": {
+            "Enabled": false,
+            "Quantity": 0
+        },
+        "TrustedKeyGroups": {
+            "Enabled": false,
+            "Quantity": 0
+        },
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+            "Quantity": 3,
+            "Items": [
+                "HEAD",
+                "GET",
+                "OPTIONS"
+            ],
+            "CachedMethods": {
+                "Quantity": 2,
+                "Items": [
+                    "HEAD",
+                    "GET"
+                ]
+            }
+        },
+        "SmoothStreaming": false,
+        "Compress": false,
+        "LambdaFunctionAssociations": {
+            "Quantity": 0
+        },
+        "FieldLevelEncryptionId": "",
+        "CachePolicyId": "f07eda0f-b830-4ed7-ba09-0bd5504ca2ff",
+        "OriginRequestPolicyId": "d1f5d86b-bc1b-44b9-89e9-2d7720fab3b7"
+    },
+    "CacheBehaviors": {
+        "Quantity": 0
+    },
+    "CustomErrorResponses": {
+        "Quantity": 1,
+        "Items": [{
+            "ErrorCode": 404,
+            "ResponsePagePath": "/index.html",
+            "ResponseCode": "200",
+            "ErrorCachingMinTTL": 10
+        }]
+    },
+    "Comment": "",
+    "Logging": {
+        "Enabled": false,
+        "IncludeCookies": false,
+        "Bucket": "",
+        "Prefix": ""
+    },
+    "PriceClass": "PriceClass_All",
+    "Enabled": true,
+    "ViewerCertificate": {
+        "ACMCertificateArn": "arn:aws:acm:us-east-1:291752019718:certificate/7047cf13-8334-4a8e-86de-dd1d0043e5bf",
+        "SSLSupportMethod": "sni-only",
+        "MinimumProtocolVersion": "TLSv1.2_2019",
+        "Certificate": "arn:aws:acm:us-east-1:291752019718:certificate/7047cf13-8334-4a8e-86de-dd1d0043e5bf",
+        "CertificateSource": "acm"
+    },
+    "Restrictions": {
+        "GeoRestriction": {
+            "RestrictionType": "none",
+            "Quantity": 0
+        }
+    },
+    "WebACLId": "",
+    "HttpVersion": "http2",
+    "IsIPV6Enabled": true
+
+}

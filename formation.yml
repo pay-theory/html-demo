@@ -4,6 +4,9 @@ Parameters:
   Env:
     Type: String
     Description: The environment you're deploying to. 
+  CachePolicy:
+    Type: String
+    Description: The cache policy for cloudfront
 Resources:
   HTMLExampleCodeBuild:
     Type: 'AWS::CodeBuild::Project'
@@ -90,7 +93,7 @@ Resources:
             - HEAD
             - OPTIONS
           TargetOriginId: !Sub 'paytheory-sdk-example-${Env}'
-          CachePolicyId: f07eda0f-b830-4ed7-ba09-0bd5504ca2ff
+          CachePolicyId: !Sub '${CachePolicy}'
           OriginRequestPolicyId: d1f5d86b-bc1b-44b9-89e9-2d7720fab3b7
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2

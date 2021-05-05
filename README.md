@@ -14,9 +14,10 @@ edit the file created as *shell/formation.your-branch-name.sh*
 enter values for each environment variable set at top of file
 
 ```bash
-sh shell/formation.sh your-branch-name
+sh shell/formation.init.sh your-branch-name
 sh shell/build_env.sh your-branch-name
 sh shell/deploy.sh
+sh shell/formation.post.init.sh your-branch-name
 ```
 
 ## Manual update deployment of project code
