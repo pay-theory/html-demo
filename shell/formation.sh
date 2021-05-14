@@ -3,7 +3,7 @@
 PARTNER=$1
 STAGE=$2
 MODE=$3
-aws cloudformation create-${MODE} \
+aws cloudformation ${MODE}-stack \
 --region 'us-east-1' \
 --stack-name html-example-${PARTNER}-${STAGE} \
 --template-body file://formation.yml \
