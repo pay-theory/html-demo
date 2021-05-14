@@ -1,17 +1,17 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Secure Tags Library Deployment
 Parameters:
-  Env:
+  Partner:
     Type: String
-    Description: The environment you're deploying to. 
-  CachePolicy:
+    Description: The environment you're deploying to.
+  Stage:
     Type: String
-    Description: The cache policy for cloudfront
+    Description: Library stage to use.
 Resources:
   HTMLExampleCodeBuild:
     Type: 'AWS::CodeBuild::Project'
     Properties:
-      Name: !Sub 'paytheory-html-demo-${Env}'
+      Name: !Sub 'paytheory-html-demo-${Partner}-${Stage}'
       Description: A website providing hosted fields for Pay Theory SDK
       ServiceRole: 'arn:aws:iam::291752019718:role/pay-theory-code-builder'
       Artifacts:
@@ -21,22 +21,25 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: 'aws/codebuild/standard:5.0'
         EnvironmentVariables:
-          - Name: REACT_APP_ENVIRONMENT
+          - Name: PARTNER
             Type: PLAINTEXT
-            Value: !Sub '${Env}'
+            Value: !Sub '${Partner}'
+          - Name: STAGE
+            Type: PLAINTEXT
+            Value: !Sub '${Stage}'
       Source:
         Location: >-
           https://git-codecommit.us-east-1.amazonaws.com/v1/repos/html-demo
         Type: CODECOMMIT
         BuildSpec: buildspec.yml
-      SourceVersion: !Sub 'refs/heads/${Env}'
+      SourceVersion: !Sub 'refs/heads/${Partner}-${Stage}'
       TimeoutInMinutes: 10
   HTMLExamplePipeline:
     DependsOn:
       - HTMLExampleCodeBuild
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
-      Name: !Sub 'paytheory-html-demo-${Env}'
+      Name: !Sub 'paytheory-html-demo-${Partner}-${Stage}'
       RoleArn: >-
         arn:aws:iam::291752019718:role/service-role/AWSCodePipelineServiceRole-paytheory
       Stages:
@@ -52,7 +55,7 @@ Resources:
                 - Name: SourceArtifact
               Configuration:
                 PollForSourceChanges: false
-                BranchName: !Sub '${Env}'
+                BranchName: !Sub '${Partner}-${Stage}'
                 RepositoryName: html-demo
               RunOrder: 1
         - Name: Build
@@ -70,7 +73,7 @@ Resources:
                 Version: 1
                 Provider: CodeBuild
               Configuration:
-                ProjectName: !Sub 'paytheory-html-demo-${Env}'
+                ProjectName: !Sub 'paytheory-html-demo-${Partner}-${Stage}'
               RunOrder: 1
       ArtifactStore:
         Type: S3
@@ -80,7 +83,7 @@ Resources:
     Properties:
       DistributionConfig:
         Aliases:
-          - !Sub '${Env}.html.example.paytheorystudy.com'
+          - !Sub '${Partner}.html.example.${Stage}.com'
         CustomErrorResponses:
           -
             ErrorCachingMinTTL: 10
@@ -92,8 +95,8 @@ Resources:
             - GET
             - HEAD
             - OPTIONS
-          TargetOriginId: !Sub 'paytheory-sdk-example-${Env}'
-          CachePolicyId: !Sub '${CachePolicy}'
+          TargetOriginId: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
+          CachePolicyId: f07eda0f-b830-4ed7-ba09-0bd5504ca2ff
           OriginRequestPolicyId: d1f5d86b-bc1b-44b9-89e9-2d7720fab3b7
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
@@ -105,18 +108,24 @@ Resources:
               OriginSSLProtocols:
                 - TLSv1.2
             DomainName: paytheory-sdk-example.s3-website-us-east-1.amazonaws.com
-            OriginPath: !Sub '/html/${Env}'
-            Id: !Sub 'paytheory-sdk-example-${Env}'
+            OriginPath: !Sub '/html/${Partner}-${Stage}'
+            Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
         ViewerCertificate:
-          AcmCertificateArn: 'arn:aws:acm:us-east-1:291752019718:certificate/7047cf13-8334-4a8e-86de-dd1d0043e5bf'
+          AcmCertificateArn: !ImportValue 
+            'Fn::Sub': pt-environment-html-example-certificate
           MinimumProtocolVersion: TLSv1.2_2019
           SslSupportMethod: 'sni-only'
   HTMLExampleRoute53:
-    Type: 'AWS::Route53::RecordSet'
+    DependsOn:
+      - HTMLExampleCloudFront
+    Type: 'AWS::Route53::RecordSetGroup'
     Properties:
-      HostedZoneId : 'Z07098583EY0K7E77N5DU'
-      Name: !Sub '${Env}.html.example.paytheorystudy.com'
-      Type: 'CNAME'
-      ResourceRecords:
-        - Fn::GetAtt: [ HTMLExampleCloudFront, DomainName ]
-      TTL: '300'
+      HostedZoneId: !ImportValue 
+            'Fn::Sub': 'pt-environment-${Stage}-zone'
+      RecordSets:  
+        - 
+          Name: !Sub '${Partner}.html.example.${Stage}.com'
+          Type: A
+          AliasTarget: 
+            HostedZoneId: Z2FDTNDATAQYW2
+            DNSName: !GetAtt HTMLExampleCloudFront.DomainName
