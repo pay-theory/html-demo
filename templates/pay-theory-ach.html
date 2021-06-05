@@ -18,6 +18,7 @@
                 <form>
                     <div id="pay-theory-ach-account-name"></div>
                     <div id="pay-theory-ach-account-number"></div>
+                    <div id="pay-theory-ach-routing-number"></div>
                     <div id="pay-theory-ach-account-type"></div>
                     <div id="pay-theory-ach-bank-code"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
@@ -54,7 +55,7 @@
             // optionally provide custom tags to help track purchases
             const TAGS = {
                 'pay-theory-account-code': 'html-demo',
-                'pay-theory-reference': 'credit-card-number'
+                'pay-theory-reference': 'ach-bank-account'
             }
             const FEE_MODE = window.paytheory.SURCHARGE
 

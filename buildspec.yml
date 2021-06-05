@@ -16,6 +16,7 @@ phases:
     commands:
       - sh shell/build_env.sh
       - sh shell/deploy.sh
+      - sh shell/formation.sh $PARTNER $STAGE update      
   post_build:
     commands:
       - echo Build completed on `date`
