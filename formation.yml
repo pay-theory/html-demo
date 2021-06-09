@@ -186,4 +186,4 @@ Resources:
 Outputs:
   Renew:
     Description: Trigger to update/rebuild formation
-    Value: '6/9/2021 9:27am aron'          
+    Value: '6/9/2021 9:29am aron'          
