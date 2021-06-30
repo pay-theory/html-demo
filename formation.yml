@@ -41,12 +41,11 @@ Resources:
               OriginProtocolPolicy: 'https-only'
               OriginSSLProtocols:
                 - TLSv1.2
-            DomainName: paytheory-sdk-example.s3-website-us-east-1.amazonaws.com
-            OriginPath: !Sub '/html/${Partner}-${Stage}'
+            DomainName: !Sub '{{resolve:ssm:pt-account-${Repository}-bucket-website:1}}'
+            OriginPath: !Sub '/${Stage}/${Partner}'
             Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
         ViewerCertificate:
-          AcmCertificateArn: !ImportValue
-            'Fn::Sub': pt-environment-html-example-certificate
+          AcmCertificateArn: !Sub '{{resolve:ssm:pt-account-${Repository}-certificate:1}}'
           MinimumProtocolVersion: TLSv1.2_2019
           SslSupportMethod: 'sni-only'
   Route53:
@@ -54,8 +53,7 @@ Resources:
       - CloudFront
     Type: 'AWS::Route53::RecordSetGroup'
     Properties:
-      HostedZoneId: !ImportValue
-            'Fn::Sub': 'pt-environment-${Stage}-zone'
+      HostedZoneId: !Sub '{{resolve:ssm:hosted-zone-${Stage}:1}}'
       RecordSets:
         -
           Name: !Sub '${Partner}.html.example.${Stage}.com'
@@ -65,121 +63,69 @@ Resources:
             DNSName: !GetAtt CloudFront.DomainName
 
   CodeBuild:
-    Type: 'AWS::CodeBuild::Project'
+    Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub 'paytheory-${Repository}-${Partner}-${Stage}'
-      Description: A website providing hosted fields for Pay Theory SDK
-      ServiceRole: 'arn:aws:iam::291752019718:role/pay-theory-code-builder'
+      Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
+      Description: !Sub '${Repository} service build'
+      ServiceRole: !Sub '{{resolve:ssm:pt-global-codebuild-role:1}}'
       Artifacts:
-        Type: no_artifacts
+        Type: CODEPIPELINE
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
         Image: 'aws/codebuild/standard:5.0'
         EnvironmentVariables:
-          - Name: PARTNER
-            Type: PLAINTEXT
-            Value: !Sub '${Partner}'
           - Name: STAGE
             Type: PLAINTEXT
             Value: !Sub '${Stage}'
+          - Name: PARTNER
+            Type: PLAINTEXT
+            Value: !Sub '${Partner}' 
       Source:
-        Location: !Sub 'https://git-codecommit.us-east-1.amazonaws.com/v1/repos/${Repository}'
-        Type: CODECOMMIT
-        BuildSpec: buildspec.yml
-      SourceVersion: !Sub 'refs/heads/${Partner}-${Stage}'
-      TimeoutInMinutes: 10
+        Type: CODEPIPELINE
+      TimeoutInMinutes: 20  
+
   CodePipeline:
     DependsOn:
       - CodeBuild
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
-      Name: !Sub 'paytheory-${Repository}-${Partner}-${Stage}'
-      RoleArn: >-
-        arn:aws:iam::291752019718:role/service-role/AWSCodePipelineServiceRole-paytheory
+      Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
+      RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role:1}}'
       Stages:
         - Name: Source
           Actions:
-            - Name: SourceAction
+            - InputArtifacts: []
+              Name: Source
               ActionTypeId:
-                Category: Source
+                Version: "1"
                 Owner: AWS
-                Version: 1
-                Provider: CodeCommit
+                Category: Source
+                Provider: CodeStarSourceConnection
               OutputArtifacts:
                 - Name: SourceArtifact
-              Configuration:
-                PollForSourceChanges: false
-                BranchName: !Sub '${Partner}-${Stage}'
-                RepositoryName: !Sub '${Repository}'
               RunOrder: 1
-        - Name: Build
+              Configuration:
+                ConnectionArn: !Sub '{{resolve:ssm:pt-global-github-connection:1}}'
+                FullRepositoryId: !Sub 'pay-theory/${Repository}'
+                BranchName: !Sub '${Partner}-${Stage}'
+                OutputArtifactFormat: "CODE_ZIP"
+        - Name: Deploy
           Actions:
-            - Name: BuildAction
-              Region: us-east-1
-              Namespace: BuildVariables
-              InputArtifacts:
-                - Name: SourceArtifact
-              OutputArtifacts:
-                - Name: BuildArtifact
+            - Name: !Sub 'cd-${Repository}-${Partner}-${Stage}'
               ActionTypeId:
                 Category: Build
                 Owner: AWS
-                Version: 1
+                Version: "1"
                 Provider: CodeBuild
+              InputArtifacts:
+                - Name: SourceArtifact
               Configuration:
-                ProjectName: !Sub 'paytheory-${Repository}-${Partner}-${Stage}'
-              RunOrder: 1
+                ProjectName: !Ref CodeBuild
+              RunOrder: 1                
       ArtifactStore:
         Type: S3
-        Location: paytheory-static-deployment
-  CloudWatchEventRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          -
-            Effect: Allow
-            Principal:
-              Service:
-                - events.amazonaws.com
-            Action: sts:AssumeRole
-      Path: /
-      Policies:
-        -
-          PolicyName: cwe-pipeline-execution
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              -
-                Effect: Allow
-                Action: codepipeline:StartPipelineExecution
-                Resource: !Join [ '', [ 'arn:aws:codepipeline:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId', ':', !Ref CodePipeline ] ]
-  CloudWatchEventRule:
-    Type: AWS::Events::Rule
-    Properties:
-      EventPattern:
-        source:
-          - aws.codecommit
-        detail-type:
-          - 'CodeCommit Repository State Change'
-        resources:
-          - !Join [ '', [ 'arn:aws:codecommit:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId', ':', !Sub '${Repository}' ] ]
-        detail:
-          event:
-            - referenceCreated
-            - referenceUpdated
-          referenceType:
-            - branch
-          referenceName:
-            - !Sub "${Partner}-${Stage}"
-      Targets:
-        -
-          Arn:
-            !Join [ '', [ 'arn:aws:codepipeline:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId', ':', !Ref CodePipeline ] ]
-          RoleArn: !GetAtt CloudWatchEventRole.Arn
-          Id: !Sub 'codepipeline-${Repository}-${Partner}-${Stage}'
+        Location: !Sub '{{resolve:ssm:pt-global-codepipeline-bucket:1}}'
 
 
 Outputs:
