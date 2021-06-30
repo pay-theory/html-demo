@@ -30,7 +30,7 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties:
       AccessControl: PublicRead
-      BucketName: !Sub 'paytheory-sdk-example-${Repository}'
+      BucketName: !Sub 'paytheory-sdk-example-${Repository}-${Partner}'
       MetricsConfigurations:
         - Id: EntireBucket
       WebsiteConfiguration:
