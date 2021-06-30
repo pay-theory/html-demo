@@ -1,6 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: product globals
 Parameters:
+  Partner:
+    Type: String
+    Description: the partner deployed
   Repository:
     Type: String
     Description: the repository deployed
