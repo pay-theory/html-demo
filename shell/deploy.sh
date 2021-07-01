@@ -1,1 +1,1 @@
-aws s3 cp public s3://paytheory-sdk-example-html-demo --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive --cache-control max-age=3
+aws s3 cp public s3://html-demo-$ACCOUNT_ID --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive

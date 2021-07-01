@@ -30,8 +30,8 @@ Resources:
             - HEAD
             - OPTIONS
           TargetOriginId: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
-          CachePolicyId: f07eda0f-b830-4ed7-ba09-0bd5504ca2ff
-          OriginRequestPolicyId: d1f5d86b-bc1b-44b9-89e9-2d7720fab3b7
+          CachePolicyId: '{{resolve:ssm:pt-global-static-site-default-cache}}'
+          OriginRequestPolicyId: '{{resolve:ssm:pt-global-static-site-default-origin}}'
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
         IPV6Enabled: true
@@ -41,11 +41,11 @@ Resources:
               OriginProtocolPolicy: 'https-only'
               OriginSSLProtocols:
                 - TLSv1.2
-            DomainName: !Sub '{{resolve:ssm:pt-account-${Repository}-bucket-website:1}}'
+            DomainName: !Sub '{{resolve:ssm:pt-account-${Repository}-bucket-website}}'
             OriginPath: !Sub '/${Stage}/${Partner}'
             Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
         ViewerCertificate:
-          AcmCertificateArn: !Sub '{{resolve:ssm:pt-account-${Repository}-certificate:1}}'
+          AcmCertificateArn: !Sub '{{resolve:ssm:pt-account-${Repository}-certificate}}'
           MinimumProtocolVersion: TLSv1.2_2019
           SslSupportMethod: 'sni-only'
   Route53:
@@ -53,7 +53,7 @@ Resources:
       - CloudFront
     Type: 'AWS::Route53::RecordSetGroup'
     Properties:
-      HostedZoneId: !Sub '{{resolve:ssm:hosted-zone-${Stage}:1}}'
+      HostedZoneId: !Sub '{{resolve:ssm:hosted-zone-${Stage}}}'
       RecordSets:
         -
           Name: !Sub '${Partner}.html.example.${Stage}.com'
@@ -67,7 +67,7 @@ Resources:
     Properties:
       Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
       Description: !Sub '${Repository} service build'
-      ServiceRole: !Sub '{{resolve:ssm:pt-global-codebuild-role:1}}'
+      ServiceRole: !Sub '{{resolve:ssm:pt-global-codebuild-role}}'
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -81,6 +81,9 @@ Resources:
           - Name: PARTNER
             Type: PLAINTEXT
             Value: !Sub '${Partner}' 
+          - Name: DISTRIBUTION
+            Type: PLAINTEXT
+            Value: !Ref CloudFront
       Source:
         Type: CODEPIPELINE
       TimeoutInMinutes: 20  
@@ -91,7 +94,7 @@ Resources:
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
       Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
-      RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role:1}}'
+      RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role}}'
       Stages:
         - Name: Source
           Actions:
@@ -106,7 +109,7 @@ Resources:
                 - Name: SourceArtifact
               RunOrder: 1
               Configuration:
-                ConnectionArn: !Sub '{{resolve:ssm:pt-global-github-connection:1}}'
+                ConnectionArn: !Sub '{{resolve:ssm:pt-global-github-connection}}'
                 FullRepositoryId: !Sub 'pay-theory/${Repository}'
                 BranchName: !Sub '${Partner}-${Stage}'
                 OutputArtifactFormat: "CODE_ZIP"
@@ -125,7 +128,7 @@ Resources:
               RunOrder: 1                
       ArtifactStore:
         Type: S3
-        Location: !Sub '{{resolve:ssm:pt-global-codepipeline-bucket:1}}'
+        Location: !Sub '{{resolve:ssm:pt-global-codepipeline-bucket}}'
 
 
 Outputs:

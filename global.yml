@@ -30,7 +30,7 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties:
       AccessControl: PublicRead
-      BucketName: !Sub 'paytheory-sdk-example-${Repository}-${Partner}'
+      BucketName: !Sub '${Repository}-${AWS::AccountId}'
       MetricsConfigurations:
         - Id: EntireBucket
       WebsiteConfiguration:
@@ -48,12 +48,12 @@ Resources:
           - Action:
               - 's3:GetObject'
             Effect: Allow
-            Resource: !Sub 'arn:aws:s3:::paytheory-sdk-example-${Repository}/*'
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}/*'
             Principal: '*'
           - Action:
               - 's3:ListBucket'
             Effect: Allow
-            Resource: !Sub 'arn:aws:s3:::paytheory-sdk-example-${Repository}'
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}'
             Principal: '*'    
     
             

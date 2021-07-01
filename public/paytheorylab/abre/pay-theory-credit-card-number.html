@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <script src="https://michigancity.sdk.paytheorystudy.com/index.js"></script>
+        <script src="https://abre.sdk.paytheorylab.com/index.js"></script>
         <style>
             #main,
             form {
@@ -16,11 +16,9 @@
         <div id="main">
             <div>
                 <form>
-                    <div id="pay-theory-ach-account-name"></div>
-                    <div id="pay-theory-ach-account-number"></div>
-                    <div id="pay-theory-ach-routing-number"></div>
-                    <div id="pay-theory-ach-account-type"></div>
-                    <div id="pay-theory-ach-bank-code"></div>
+                    <div id="pay-theory-credit-card-number"></div>
+                    <div id="pay-theory-credit-card-exp"></div>
+                    <div id="pay-theory-credit-card-cvv"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -57,7 +55,7 @@
             // optionally provide custom tags to help track purchases
             const TAGS = {
                 'pay-theory-account-code': 'html-demo',
-                'pay-theory-reference': 'ach-bank-account'
+                'pay-theory-reference': 'credit-card-number'
             }
             const FEE_MODE = window.paytheory.SURCHARGE
 
@@ -67,7 +65,7 @@
                     STYLES,
                     TAGS,
                     FEE_MODE,
-                    'michigancity-paytheorystudy')
+                    'abre-paytheorylab')
                 .then(myCreditCard => {
                     myCreditCard.mount()
 

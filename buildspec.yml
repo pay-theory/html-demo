@@ -4,19 +4,6 @@ phases:
   install:
     runtime-versions:
       nodejs: latest
-  pre_build:
-    commands:
-      - echo Installing dependencies...
-      - npm install -g npm@latest
-      - export REACT_APP_PARTNER=$PARTNER
-      - export REACT_APP_STAGE=$STAGE
-      - export REACT_APP_ENVIRONMENT=$PARTNER-$STAGE
-      - export SDK_URL=https://$PARTNER.sdk.$STAGE.com/index.js
   build:
     commands:
-      - sh shell/build_env.sh $PARTNER $STAGE
-      - sh shell/deploy.sh
-      - sh shell/formation.sh $PARTNER $STAGE update || true
-  post_build:
-    commands:
-      - echo Build completed on `date`
+      - sh shell/update_partner_stage.sh $PARTNER $STAGE
