@@ -4,6 +4,13 @@ phases:
   install:
     runtime-versions:
       nodejs: latest
+  pre_build:
+    commands:      
+      - export SERVICE_NAME=html-demo
+      - export SERVICE_TYPE=example
+      - export TARGET_REGION=$AWS_REGION
+      - export TARGET_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)      
   build:
     commands:
-      - sh shell/update_partner_stage.sh $PARTNER $STAGE
+      - bash shell/02_partner_stage/01_prepare.sh $PARTNER $STAGE $SERVICE_TYPE $SERVICE_NAME
+      - bash shell/02_partner_stage/02_deploy.sh $PARTNER $STAGE $SERVICE_TYPE $SERVICE_NAME  
