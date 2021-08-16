@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+PARTNER=$1
+STAGE=$2
+SERVICE_NAME=$3
+SERVICE_TYPE=$4
+
+S3_ARTIFACTS_BUCKET="partner-services-deployment-${TARGET_ACCOUNT_ID}"
+S3_ARTIFACTS_PATH="code/${SERVICE_NAME}-${PARTNER}-${STAGE}"
+
+
+echo "Printing Local scope variables";
+echo "PARTNER :: $PARTNER"
+echo "STAGE :: $STAGE"
+echo "SERVICE_NAME :: $SERVICE_NAME"
+echo "SERVICE_TYPE :: $SERVICE_TYPE"
+
+
+echo "Validating the cfn templates `date` in `pwd`" ;
+sam validate -t ./templates/formation.yml ;
+echo "Starting SAM build `date` in `pwd`" ;
+
+
+export REACT_APP_PARTNER=$PARTNER
+export REACT_APP_STAGE=$STAGE
+export REACT_APP_ENVIRONMENT=$PARTNER-$STAGE
+
+npm install
+npm run build
+aws s3 cp build s3://books-app-demo-$TARGET_ACCOUNT_ID/$STAGE/$PARTNER --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
+
+sam deploy --template-file ./templates/formation.yml \
+--stack-name books-app-demo-${PARTNER}-${STAGE} \
+--region ${TARGET_REGION} \
+--capabilities CAPABILITY_IAM \
+--no-fail-on-empty-changeset \
+--parameter-overrides \
+ParameterKey=Partner,ParameterValue=${PARTNER} \
+ParameterKey=Stage,ParameterValue=${STAGE}
