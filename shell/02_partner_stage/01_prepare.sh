@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
 
-PARTNER=$1
-STAGE=$2
-SERVICE_NAME=$3
-SERVICE_TYPE=$4
-
 export PARTNER=$1
 export STAGE=$2
 export ENVIRONMENT=$1-$2
-export SDK_URL="$PARTNER.sdk.$STAGE.com"
+export SDK_URL="https://$PARTNER.sdk.$STAGE.com/index.js"
 
 echo "Starting build $SDK_URL in `pwd`" ;
 
-
 # prepare for deployment
-
 # remove prior builds
-rm -rf public/*
+rm -rf public/$STAGE
 
-# directory for compiled source code if applicable
-# mkdir -p src/${SERVICE_NAME}/service
-mkdir -p public
+# directory for compiled source code
+mkdir -p public/$STAGE/$PARTNER
+
+echo $PARTNER-$STAGE Credit Card Build started on `date`
+
+# copy in html templates
+sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/pay-theory-credit-card.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER/pay-theory-credit-card.html
+sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/pay-theory-credit-card-number.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER/pay-theory-credit-card-number.html
+sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/pay-theory-ach.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER/pay-theory-ach.html
 
 # copy in root html file
-sed 's#SDK_URL#'$SDK_URL'#g' templates/html/index.html > public/index.html
+cp index.html public/$STAGE/$PARTNER/.

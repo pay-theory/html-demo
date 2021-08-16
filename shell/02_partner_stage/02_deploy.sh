@@ -20,17 +20,10 @@ echo "Validating the cfn templates `date` in `pwd`" ;
 sam validate -t ./templates/formation.yml ;
 echo "Starting SAM build `date` in `pwd`" ;
 
-
-export REACT_APP_PARTNER=$PARTNER
-export REACT_APP_STAGE=$STAGE
-export REACT_APP_ENVIRONMENT=$PARTNER-$STAGE
-
-npm install
-npm run build
-aws s3 cp build s3://books-app-demo-$TARGET_ACCOUNT_ID/$STAGE/$PARTNER --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
+aws s3 cp public s3://html-demo-$TARGET_ACCOUNT_ID --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
 
 sam deploy --template-file ./templates/formation.yml \
---stack-name books-app-demo-${PARTNER}-${STAGE} \
+--stack-name html-example-${PARTNER}-${STAGE} \
 --region ${TARGET_REGION} \
 --capabilities CAPABILITY_IAM \
 --no-fail-on-empty-changeset \
