@@ -20,7 +20,7 @@ Resources:
           - !Sub '${Partner}.html.example.${Stage}.com'
         CustomErrorResponses:
           -
-            ErrorCachingMinTTL: 10
+            ErrorCachingMinTTL: 15
             ErrorCode: 404
             ResponseCode: 200
             ResponsePagePath: /index.html
