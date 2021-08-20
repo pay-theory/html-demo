@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <script src="https://scview.sdk.paytheorystudy.com/index.js"></script>
+        <script src="https://zippslip.sdk.paytheorylab.com/index.js"></script>
         <style>
             #main,
             form {
@@ -16,9 +16,7 @@
         <div id="main">
             <div>
                 <form>
-                    <div id="pay-theory-credit-card-number"></div>
-                    <div id="pay-theory-credit-card-exp"></div>
-                    <div id="pay-theory-credit-card-cvv"></div>
+                    <div id="pay-theory-credit-card"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -27,8 +25,8 @@
         </div>
         </div>
         <script type="text/javascript">
-            const urlParams = new URLSearchParams(window.location.search)
             // API KEY is required
+            const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
             const AMOUNT = 5000
             const first_name = urlParams.get('first_name') ? urlParams.get('first_name') : 'Html'
@@ -54,10 +52,7 @@
             }
 
             // optionally provide custom tags to help track purchases
-            const TAGS = {
-                'pay-theory-account-code': 'html-demo',
-                'pay-theory-reference': 'credit-card-number'
-            }
+            const TAGS = {}
             const FEE_MODE = window.paytheory.SURCHARGE
 
 
@@ -66,7 +61,7 @@
                     STYLES,
                     TAGS,
                     FEE_MODE,
-                    'scview-paytheorystudy')
+                    'zippslip-paytheorylab')
                 .then(myCreditCard => {
                     myCreditCard.mount()
 
