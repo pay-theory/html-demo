@@ -30,3 +30,5 @@ sam deploy --template-file ./templates/formation.yml \
 --parameter-overrides \
 ParameterKey=Partner,ParameterValue=${PARTNER} \
 ParameterKey=Stage,ParameterValue=${STAGE}
+
+aws cloudfront create-invalidation --distribution-id $DISTRIBUTION --paths "/*"
