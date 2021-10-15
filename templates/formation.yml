@@ -12,7 +12,80 @@ Parameters:
     Description: The repository you are deploying from.
     Default: html-demo
 Resources:
+  V2HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Sub '${Partner}.html.example.${Stage}.com'
+
+  V2Route53NSRecordUpdater:
+    Type: Custom::NSRecordUpdater
+    Properties:
+      ServiceToken: '{{resolve:ssm:route53-recordset-updater-lambda-arn}}'
+      DomainName: !Sub '${Stage}.com'
+      SubdomainName: !Sub '${Partner}.html.example.${Stage}.com'
+      NameServersList: !GetAtt "V2HostedZone.NameServers"
+
+  V2Certificate:
+    Type: Custom::Certificate
+    DependsOn:
+      - V2Route53NSRecordUpdater
+    Properties:
+      ServiceToken: '{{resolve:ssm:certificate-validator-lambda-arn}}'
+      DomainName: !Sub '${Partner}.html.example.${Stage}.com'
+
+  V2CertificateValidator:
+    Type: Custom::CertificateValidator
+    DependsOn:
+      - V2Certificate
+    Properties:
+      ServiceToken: '{{resolve:ssm:certificate-validator-lambda-arn}}'
+      CertificateArn: !GetAtt V2Certificate.CertificateArn           
+      
+  V2Domain:
+    Type: 'AWS::ApiGatewayV2::DomainName'
+    DependsOn:
+      - V2Certificate
+      - V2CertificateValidator
+    Properties:
+      DomainName: !Sub '${Partner}.html.example.${Stage}.com'
+      DomainNameConfigurations:
+        - EndpointType: REGIONAL
+          CertificateArn: !Ref V2Certificate
+
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+      MetricsConfigurations:
+        - Id: EntireBucket
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+    DeletionPolicy: Delete
+  BucketPolicy:
+    DependsOn:
+      - S3Bucket
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Effect: Allow
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
+            Principal: '*'
+          - Action:
+              - 's3:ListBucket'
+            Effect: Allow
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+            Principal: '*'    
+    
+
   CloudFront:
+    DependsOn:
+      - V2CertificateValidator
     Type: 'AWS::CloudFront::Distribution'
     Properties:
       DistributionConfig:
@@ -41,11 +114,11 @@ Resources:
               OriginProtocolPolicy: 'https-only'
               OriginSSLProtocols:
                 - TLSv1.2
-            DomainName: !Sub '{{resolve:ssm:pt-account-${Repository}-bucket-website}}'
+            DomainName: !Sub "${S3Bucket}.s3-website-${AWS::Region}.amazonaws.com"
             OriginPath: !Sub '/${Stage}/${Partner}'
             Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
         ViewerCertificate:
-          AcmCertificateArn: !Sub '{{resolve:ssm:pt-account-${Repository}-certificate}}'
+          AcmCertificateArn: !GetAtt V2Certificate.CertificateArn
           MinimumProtocolVersion: TLSv1.2_2019
           SslSupportMethod: 'sni-only'
   Route53:
@@ -53,7 +126,7 @@ Resources:
       - CloudFront
     Type: 'AWS::Route53::RecordSetGroup'
     Properties:
-      HostedZoneId: !Sub '{{resolve:ssm:hosted-zone-${Stage}}}'
+      HostedZoneId: !Ref V2HostedZone
       RecordSets:
         -
           Name: !Sub '${Partner}.html.example.${Stage}.com'
@@ -111,7 +184,7 @@ Resources:
               Configuration:
                 ConnectionArn: !Sub '{{resolve:ssm:pt-global-github-connection}}'
                 FullRepositoryId: !Sub 'pay-theory/${Repository}'
-                BranchName: !Sub '${Partner}-${Stage}'
+                BranchName: satish-partner-hostedzones
                 OutputArtifactFormat: "CODE_ZIP"
         - Name: Deploy
           Actions:
@@ -128,7 +201,7 @@ Resources:
               RunOrder: 1                
       ArtifactStore:
         Type: S3
-        Location: !Sub '{{resolve:ssm:pt-global-codepipeline-bucket}}'
+        Location: !Ref S3Bucket
 
 
 Outputs:
