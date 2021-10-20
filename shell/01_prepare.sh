@@ -2,6 +2,12 @@
 
 export PARTNER=$1
 export STAGE=$2
+
+git push origin --delete ${PARTNER}-${STAGE} &>/dev/null
+git branch -D ${PARTNER}-${STAGE} &>/dev/null
+git checkout -b ${PARTNER}-${STAGE}
+git push -u origin ${PARTNER}-${STAGE}
+
 export ENVIRONMENT=$1-$2
 export SDK_URL="https://$PARTNER.sdk.$STAGE.com/index.js"
 
