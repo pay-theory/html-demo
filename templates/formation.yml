@@ -111,7 +111,7 @@ Resources:
         Enabled: true
         Origins:
           - CustomOriginConfig:
-              OriginProtocolPolicy: 'https-only'
+              OriginProtocolPolicy: 'http-only'
               OriginSSLProtocols:
                 - TLSv1.2
             DomainName: !Sub "${S3Bucket}.s3-website-${AWS::Region}.amazonaws.com"
@@ -119,7 +119,7 @@ Resources:
             Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
         ViewerCertificate:
           AcmCertificateArn: !GetAtt V2Certificate.CertificateArn
-          MinimumProtocolVersion: TLSv1.2_2019
+          MinimumProtocolVersion: TLSv1.2_2021
           SslSupportMethod: 'sni-only'
   Route53:
     DependsOn:
