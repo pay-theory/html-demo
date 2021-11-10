@@ -24,7 +24,7 @@
             "CustomOriginConfig": {
                 "HTTPPort": 80,
                 "HTTPSPort": 443,
-                "OriginProtocolPolicy": "https-only",
+                "OriginProtocolPolicy": "http-only",
                 "OriginSslProtocols": {
                     "Quantity": 1,
                     "Items": [
@@ -103,7 +103,7 @@
     "ViewerCertificate": {
         "ACMCertificateArn": "arn:aws:acm:us-east-1:291752019718:certificate/7047cf13-8334-4a8e-86de-dd1d0043e5bf",
         "SSLSupportMethod": "sni-only",
-        "MinimumProtocolVersion": "TLSv1.2_2019",
+        "MinimumProtocolVersion": "TLSv1.2_2021",
         "Certificate": "arn:aws:acm:us-east-1:291752019718:certificate/7047cf13-8334-4a8e-86de-dd1d0043e5bf",
         "CertificateSource": "acm"
     },
