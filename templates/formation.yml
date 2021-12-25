@@ -41,16 +41,17 @@ Resources:
       ServiceToken: '{{resolve:ssm:certificate-validator-lambda-arn}}'
       CertificateArn: !GetAtt V2Certificate.CertificateArn           
       
-  V2Domain:
-    Type: 'AWS::ApiGatewayV2::DomainName'
-    DependsOn:
-      - V2Certificate
-      - V2CertificateValidator
-    Properties:
-      DomainName: !Sub '${Partner}.html.example.${Stage}.com'
-      DomainNameConfigurations:
-        - EndpointType: REGIONAL
-          CertificateArn: !Ref V2Certificate
+  # **** static web apps do not require AWS::ApiGatewayV2::DomainName      
+  # V2Domain:
+  #   Type: 'AWS::ApiGatewayV2::DomainName'
+  #   DependsOn:
+  #     - V2Certificate
+  #     - V2CertificateValidator
+  #   Properties:
+  #     DomainName: !Sub '${Partner}.html.example.${Stage}.com'
+  #     DomainNameConfigurations:
+  #       - EndpointType: REGIONAL
+  #         CertificateArn: !Ref V2Certificate
 
   S3Bucket:
     Type: 'AWS::S3::Bucket'
