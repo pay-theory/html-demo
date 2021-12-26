@@ -104,8 +104,8 @@ Resources:
             - HEAD
             - OPTIONS
           TargetOriginId: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
-          CachePolicyId: '{{resolve:ssm:pt-global-static-site-default-cache}}'
-          OriginRequestPolicyId: '{{resolve:ssm:pt-global-static-site-default-origin}}'
+          CachePolicyId: '{{resolve:ssm:pt-global-examples-cache}}'
+          OriginRequestPolicyId: '{{resolve:ssm:pt-global-examples-origin}}'
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
         IPV6Enabled: true
