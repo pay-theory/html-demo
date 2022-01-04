@@ -3,7 +3,7 @@
 export PARTNER=$1
 export STAGE=$2
 
-local existed_in_remote=$(git ls-remote --heads origin ${PARTNER}-${STAGE})
+existed_in_remote=$(git ls-remote --heads origin ${PARTNER}-${STAGE})
 if [[ -z ${existed_in_remote} ]]
 then
     echo "Branch ${PARTNER}-${STAGE} not existed in remote, Creating now..."
