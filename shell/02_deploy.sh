@@ -29,6 +29,7 @@ sam deploy --template-file ./templates/formation.yml \
 --no-fail-on-empty-changeset \
 --parameter-overrides \
 ParameterKey=Partner,ParameterValue=${PARTNER} \
-ParameterKey=Stage,ParameterValue=${STAGE}
+ParameterKey=Stage,ParameterValue=${STAGE} \
+ParameterKey=DeploymentMode,ParameterValue=${MODE}
 
 if ! [ -z ${DISTRIBUTION+x} ]; then aws cloudfront create-invalidation --distribution-id $DISTRIBUTION --paths "/*" ; fi;
