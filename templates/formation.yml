@@ -15,14 +15,14 @@ Resources:
   V2HostedZone:
     Type: AWS::Route53::HostedZone
     Properties:
-      Name: !Sub '${Partner}.prototype.html.example.${Stage}.com'
+      Name: !Sub '${Partner}${DeploymentMode}.html.example.${Stage}.com'
 
   V2Route53NSRecordUpdater:
     Type: Custom::NSRecordUpdater
     Properties:
       ServiceToken: '{{resolve:ssm:route53-recordset-updater-lambda-arn}}'
       DomainName: !Sub '${Stage}.com'
-      SubdomainName: !Sub '${Partner}.prototype.html.example.${Stage}.com'
+      SubdomainName: !Sub '${Partner}${DeploymentMode}.html.example.${Stage}.com'
       NameServersList: !GetAtt "V2HostedZone.NameServers"
 
   V2Certificate:
@@ -31,7 +31,7 @@ Resources:
       - V2Route53NSRecordUpdater
     Properties:
       ServiceToken: '{{resolve:ssm:certificate-validator-lambda-arn}}'
-      DomainName: !Sub '${Partner}.prototype.html.example.${Stage}.com'
+      DomainName: !Sub '${Partner}${DeploymentMode}.html.example.${Stage}.com'
 
   V2CertificateValidator:
     Type: Custom::CertificateValidator
@@ -48,7 +48,7 @@ Resources:
   #     - V2Certificate
   #     - V2CertificateValidator
   #   Properties:
-  #     DomainName: !Sub '${Partner}.prototype.html.example.${Stage}.com'
+  #     DomainName: !Sub '${Partner}${DeploymentMode}.html.example.${Stage}.com'
   #     DomainNameConfigurations:
   #       - EndpointType: REGIONAL
   #         CertificateArn: !Ref V2Certificate
@@ -91,7 +91,7 @@ Resources:
     Properties:
       DistributionConfig:
         Aliases:
-          - !Sub '${Partner}.prototype.html.example.${Stage}.com'
+          - !Sub '${Partner}${DeploymentMode}.html.example.${Stage}.com'
         CustomErrorResponses:
           -
             ErrorCachingMinTTL: 15
@@ -130,7 +130,7 @@ Resources:
       HostedZoneId: !Ref V2HostedZone
       RecordSets:
         -
-          Name: !Sub '${Partner}.prototype.html.example.${Stage}.com'
+          Name: !Sub '${Partner}${DeploymentMode}.html.example.${Stage}.com'
           Type: A
           AliasTarget:
             HostedZoneId: Z2FDTNDATAQYW2
@@ -149,6 +149,9 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: 'aws/codebuild/standard:5.0'
         EnvironmentVariables:
+          - Name: MODE
+            Type: PLAINTEXT
+            Value: !Sub '${DeploymentMode}'
           - Name: STAGE
             Type: PLAINTEXT
             Value: !Sub '${Stage}'
