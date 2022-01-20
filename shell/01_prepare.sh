@@ -3,12 +3,12 @@
 export PARTNER=$1
 export STAGE=$2
 
-existed_in_remote=$(git ls-remote --heads origin ${PARTNER}-${STAGE})
+existed_in_remote=$(git ls-remote --heads origin ${PARTNER}-prototype-${STAGE})
 if [[ -z ${existed_in_remote} ]]
 then
-    echo "Branch ${PARTNER}-${STAGE} not existed in remote, Creating now..."
-    git checkout -b ${PARTNER}-${STAGE}
-    git push -u origin ${PARTNER}-${STAGE}
+    echo "Branch ${PARTNER}-prototype-${STAGE} not existed in remote, Creating now..."
+    git checkout -b ${PARTNER}-prototype-${STAGE}
+    git push -u origin ${PARTNER}-prototype-${STAGE}
 fi
 
 export ENVIRONMENT=$1-$2
