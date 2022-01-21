@@ -4,7 +4,7 @@ PARTNER=$1
 STAGE=$2
 SERVICE_TYPE=$3
 SERVICE_NAME=$4
-MODE=$6
+MODE=$5
 
 # if there is a .git directory we are in partner-factory
 if [ -d ".git" ]
