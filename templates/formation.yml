@@ -61,7 +61,7 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties:
       AccessControl: PublicRead
-      BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+      BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}${DeploymentMode}-${Stage}'
       MetricsConfigurations:
         - Id: EntireBucket
       WebsiteConfiguration:
@@ -79,12 +79,12 @@ Resources:
           - Action:
               - 's3:GetObject'
             Effect: Allow
-            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}${DeploymentMode}-${Stage}/*'
             Principal: '*'
           - Action:
               - 's3:ListBucket'
             Effect: Allow
-            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}${DeploymentMode}-${Stage}'
             Principal: '*'    
     
 
@@ -107,7 +107,7 @@ Resources:
             - GET
             - HEAD
             - OPTIONS
-          TargetOriginId: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
+          TargetOriginId: !Sub 'paytheory-sdk-example-${Partner}${DeploymentMode}-${Stage}'
           CachePolicyId: '{{resolve:ssm:pt-global-examples-cache}}'
           OriginRequestPolicyId: '{{resolve:ssm:pt-global-examples-origin}}'
           ViewerProtocolPolicy: redirect-to-https
@@ -121,7 +121,7 @@ Resources:
                 - TLSv1.2
             DomainName: !Sub "${S3Bucket}.s3-website-${AWS::Region}.amazonaws.com"
             OriginPath: !Sub '/${Stage}/${Partner}'
-            Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
+            Id: !Sub 'paytheory-sdk-example-${Partner}${DeploymentMode}-${Stage}'
         ViewerCertificate:
           AcmCertificateArn: !GetAtt V2Certificate.CertificateArn
           MinimumProtocolVersion: TLSv1.2_2021
@@ -143,7 +143,7 @@ Resources:
   CodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
+      Name: !Sub 'cb-${Repository}-${Partner}${DeploymentMode}-${Stage}'
       Description: !Sub '${Repository} service build'
       ServiceRole: !Sub '{{resolve:ssm:pt-global-codebuild-role}}'
       Artifacts:
@@ -174,7 +174,7 @@ Resources:
       - CodeBuild
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
-      Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
+      Name: !Sub 'cb-${Repository}-${Partner}${DeploymentMode}-${Stage}'
       RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role}}'
       Stages:
         - Name: Source
@@ -196,7 +196,7 @@ Resources:
                 OutputArtifactFormat: "CODE_ZIP"
         - Name: Deploy
           Actions:
-            - Name: !Sub 'cd-${Repository}-${Partner}-${Stage}'
+            - Name: !Sub 'cd-${Repository}-${Partner}${DeploymentMode}-${Stage}'
               ActionTypeId:
                 Category: Build
                 Owner: AWS
