@@ -2,11 +2,12 @@
 
 PARTNER=$1
 STAGE=$2
-SERVICE_NAME=$3
-SERVICE_TYPE=$4
+SERVICE_TYPE=$3
+SERVICE_NAME=$4
+MODE=$5
 
 S3_ARTIFACTS_BUCKET="partner-services-deployment-${TARGET_ACCOUNT_ID}"
-S3_ARTIFACTS_PATH="code/${SERVICE_NAME}-${PARTNER}-${STAGE}"
+S3_ARTIFACTS_PATH="code/${SERVICE_NAME}-${PARTNER}${MODE}-${STAGE}"
 
 
 echo "Printing Local scope variables";
@@ -20,7 +21,7 @@ echo "Validating the cfn templates `date` in `pwd`" ;
 sam validate -t ./templates/formation.yml ;
 echo "Starting SAM build `date` in `pwd`" ;
 
-aws s3 cp public s3://html-demo-$TARGET_ACCOUNT_ID-${PARTNER}-${STAGE} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
+aws s3 cp public s3://html-demo-$TARGET_ACCOUNT_ID-${PARTNER}${MODE}-${STAGE} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
 
 sam deploy --template-file ./templates/formation.yml \
 --stack-name html-example-${PARTNER}-${STAGE} \
