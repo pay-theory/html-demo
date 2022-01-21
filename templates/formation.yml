@@ -4,6 +4,10 @@ Parameters:
   Partner:
     Type: String
     Description: The environment you're deploying to.
+  DeploymentMode:
+    Type: String
+    Description: paytheory deployment mode, defaults to standard deployment
+    Default: ""
   Stage:
     Type: String
     Description: Library stage to use.
