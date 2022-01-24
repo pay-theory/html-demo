@@ -23,8 +23,8 @@ fi
 
 #end if there is a .git directory we are in partner-factory
 fi
-export ENVIRONMENT=$1-$2
-export SDK_URL="https://$PARTNER.sdk.$STAGE.com/index.js"
+export ENVIRONMENT=$PARTNER$MODE-$STAGE
+export SDK_URL="https://$PARTNER$MODE.sdk.$STAGE.com/index.js"
 
 echo "Starting build $SDK_URL in `pwd`" ;
 
@@ -33,14 +33,14 @@ echo "Starting build $SDK_URL in `pwd`" ;
 rm -rf public/$STAGE
 
 # directory for compiled source code
-mkdir -p public/$STAGE/$PARTNER
+mkdir -p public/$STAGE/$PARTNER$MODE
 
-echo $PARTNER-$STAGE Credit Card Build started on `date`
+echo $PARTNER$MODE-$STAGE Credit Card Build started on `date`
 
 # copy in html templates
-sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/html/pay-theory-credit-card.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER/pay-theory-credit-card.html
-sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/html/pay-theory-credit-card-number.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER/pay-theory-credit-card-number.html
-sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/html/pay-theory-ach.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER/pay-theory-ach.html
+sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/html/pay-theory-credit-card.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER$MODE/pay-theory-credit-card.html
+sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/html/pay-theory-credit-card-number.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER$MODE/pay-theory-credit-card-number.html
+sed 's#TEMPLATE_URL#'$SDK_URL'#g' templates/html/pay-theory-ach.html | sed 's/TEMPLATE_ENVIRONMENT/'$ENVIRONMENT'/g' > public/$STAGE/$PARTNER$MODE/pay-theory-ach.html
 
 # copy in root html file
-cp index.html public/$STAGE/$PARTNER/.
+cp index.html public/$STAGE/$PARTNER$MODE/.
