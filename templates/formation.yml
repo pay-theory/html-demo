@@ -120,7 +120,7 @@ Resources:
               OriginSSLProtocols:
                 - TLSv1.2
             DomainName: !Sub "${S3Bucket}.s3-website-${AWS::Region}.amazonaws.com"
-            OriginPath: !Sub '/${Stage}/${Partner}'
+            OriginPath: !Sub '/${Stage}/${Partner}${DeploymentMode}'
             Id: !Sub 'paytheory-sdk-example-${Partner}${DeploymentMode}-${Stage}'
         ViewerCertificate:
           AcmCertificateArn: !GetAtt V2Certificate.CertificateArn
