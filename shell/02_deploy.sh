@@ -21,7 +21,7 @@ echo "Validating the cfn templates `date` in `pwd`" ;
 sam validate -t ./templates/formation.yml ;
 echo "Starting SAM build `date` in `pwd`" ;
 
-aws s3 cp public s3://html-demo-$TARGET_ACCOUNT_ID-${PARTNER}${MODE}-${STAGE} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
+aws s3 cp public s3://html-demo-$TARGET_ACCOUNT_ID-${PARTNER}-${STAGE} --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
 
 sam deploy --template-file ./templates/formation.yml \
 --stack-name html-example-${PARTNER}-${STAGE} \
