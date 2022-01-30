@@ -7,7 +7,7 @@ SERVICE_NAME=$4
 MODE=$5
 
 S3_ARTIFACTS_BUCKET="partner-services-deployment-${TARGET_ACCOUNT_ID}"
-S3_ARTIFACTS_PATH="code/${SERVICE_NAME}-${PARTNER}${MODE}-${STAGE}"
+S3_ARTIFACTS_PATH="code/${SERVICE_NAME}-${PARTNER}-${STAGE}"
 
 
 echo "Printing Local scope variables";
