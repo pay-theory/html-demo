@@ -2,8 +2,9 @@
 
 PARTNER=$1
 STAGE=$2
-SERVICE_NAME=$3
+SERVICE_TYPE=$3
 SERVICE_TYPE=$4
+TARGET_MODE=$5
 
 S3_ARTIFACTS_BUCKET="partner-services-deployment-${TARGET_ACCOUNT_ID}"
 S3_ARTIFACTS_PATH="code/${SERVICE_NAME}-${PARTNER}-${STAGE}"
@@ -29,6 +30,7 @@ sam deploy --template-file ./templates/formation.yml \
 --no-fail-on-empty-changeset \
 --parameter-overrides \
 ParameterKey=Partner,ParameterValue=${PARTNER} \
-ParameterKey=Stage,ParameterValue=${STAGE}
+ParameterKey=Stage,ParameterValue=${STAGE} \
+ParameterKey=TargetMode,ParameterValue=${TARGET_MODE}
 
 if ! [ -z ${DISTRIBUTION+x} ]; then aws cloudfront create-invalidation --distribution-id $DISTRIBUTION --paths "/*" ; fi;
