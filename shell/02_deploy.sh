@@ -3,7 +3,7 @@
 PARTNER=$1
 STAGE=$2
 SERVICE_TYPE=$3
-SERVICE_TYPE=$4
+SERVICE_NAME=$4
 TARGET_MODE=$5
 
 S3_ARTIFACTS_BUCKET="partner-services-deployment-${TARGET_ACCOUNT_ID}"
@@ -15,6 +15,7 @@ echo "PARTNER :: $PARTNER"
 echo "STAGE :: $STAGE"
 echo "SERVICE_NAME :: $SERVICE_NAME"
 echo "SERVICE_TYPE :: $SERVICE_TYPE"
+echo "TARGET_MODE :: $TARGET_MODE"
 
 
 echo "Validating the cfn templates `date` in `pwd`" ;
