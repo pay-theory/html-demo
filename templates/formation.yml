@@ -10,19 +10,35 @@ Parameters:
   Repository:
     Type: String
     Description: The repository you are deploying from.
-    Default: html-demo
+    Default: html-demo     
+  TargetMode:
+    Type: String
+    Description: The Deployment Mode
+    Default: standard
+    AllowedValues:
+        - standard
+        - '-new'
+        - '-old'    
+Conditions:
+    isStandard: !Equals [ !Ref TargetMode, standard]  
 Resources:
   V2HostedZone:
     Type: AWS::Route53::HostedZone
     Properties:
-      Name: !Sub '${Partner}.html.example.${Stage}.com'
+      Name: !If [ 
+        isStandard, 
+        !Sub "${Partner}.html.example.${Stage}.com", 
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
 
   V2Route53NSRecordUpdater:
     Type: Custom::NSRecordUpdater
     Properties:
       ServiceToken: '{{resolve:ssm:route53-recordset-updater-lambda-arn}}'
       DomainName: !Sub '${Stage}.com'
-      SubdomainName: !Sub '${Partner}.html.example.${Stage}.com'
+      SubdomainName: !If [ 
+        isStandard, 
+        !Sub "${Partner}.html.example.${Stage}.com", 
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
       NameServersList: !GetAtt "V2HostedZone.NameServers"
 
   V2Certificate:
@@ -31,7 +47,10 @@ Resources:
       - V2Route53NSRecordUpdater
     Properties:
       ServiceToken: '{{resolve:ssm:certificate-validator-lambda-arn}}'
-      DomainName: !Sub '${Partner}.html.example.${Stage}.com'
+      DomainName: !If [ 
+        isStandard, 
+        !Sub "${Partner}.html.example.${Stage}.com", 
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
 
   V2CertificateValidator:
     Type: Custom::CertificateValidator
@@ -40,18 +59,6 @@ Resources:
     Properties:
       ServiceToken: '{{resolve:ssm:certificate-validator-lambda-arn}}'
       CertificateArn: !GetAtt V2Certificate.CertificateArn           
-      
-  # **** static web apps do not require AWS::ApiGatewayV2::DomainName      
-  # V2Domain:
-  #   Type: 'AWS::ApiGatewayV2::DomainName'
-  #   DependsOn:
-  #     - V2Certificate
-  #     - V2CertificateValidator
-  #   Properties:
-  #     DomainName: !Sub '${Partner}.html.example.${Stage}.com'
-  #     DomainNameConfigurations:
-  #       - EndpointType: REGIONAL
-  #         CertificateArn: !Ref V2Certificate
 
   S3Bucket:
     Type: 'AWS::S3::Bucket'
@@ -91,7 +98,10 @@ Resources:
     Properties:
       DistributionConfig:
         Aliases:
-          - !Sub '${Partner}.html.example.${Stage}.com'
+          - !If [ 
+        isStandard, 
+        !Sub "${Partner}.html.example.${Stage}.com", 
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
         CustomErrorResponses:
           -
             ErrorCachingMinTTL: 15
@@ -130,7 +140,10 @@ Resources:
       HostedZoneId: !Ref V2HostedZone
       RecordSets:
         -
-          Name: !Sub '${Partner}.html.example.${Stage}.com'
+          Name: !If [ 
+        isStandard, 
+        !Sub "${Partner}.html.example.${Stage}.com", 
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
           Type: A
           AliasTarget:
             HostedZoneId: Z2FDTNDATAQYW2
