@@ -7,6 +7,7 @@ export STAGE=$2
 if [ -d ".git" ]
 then
 
+TIMESTAMP=`date "+%Y%m%d-%H%M%S"`
 # if we do not have the branch in remote create it
 existed_in_remote=$(git ls-remote --heads origin ${PARTNER}${MODE}-${STAGE} 2>/dev/null)
 if [[ -z ${existed_in_remote} ]]
@@ -17,8 +18,8 @@ then
 else
     echo "Branch ${PARTNER}${MODE}-${STAGE} existed in remote, Taking backup now..."
     BASE_BRANCH=$(git symbolic-ref --short HEAD)
-    echo "Creating backup branch with name" ${PARTNER}${MODE}-${STAGE}-date "+%Y%m%d-%H%M%S"
-    git checkout -b ${PARTNER}${MODE}-${STAGE}-date "+%Y%m%d-%H%M%S"
+    echo "Creating backup branch with name" ${PARTNER}${MODE}-${STAGE}-${TIMESTAMP}
+    git checkout -b ${PARTNER}${MODE}-${STAGE}-${TIMESTAMP}
     git push -u origin ${PARTNER}${MODE}-${STAGE}
     echo "Deleting branch ${PARTNER}${MODE}-${STAGE}"
     git push origin --delete ${PARTNER}${MODE}-${STAGE} &>/dev/null
