@@ -2,7 +2,7 @@
 
 export PARTNER=$1
 export STAGE=$2
-
+echo "MODE set to ${MODE} from ${TARGET_MODE}"
 # if there is a .git directory we are in partner-factory
 if [ -d ".git" ]
 then
