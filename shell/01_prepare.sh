@@ -2,7 +2,12 @@
 
 export PARTNER=$1
 export STAGE=$2
-echo "MODE set to ${MODE} from ${TARGET_MODE}"
+if [[ $TARGET_MODE = "standard" ]]
+then
+    MODE=""
+else
+    MODE=$TARGET_MODE
+fi
 # if there is a .git directory we are in partner-factory
 if [ -d ".git" ]
 then
@@ -34,7 +39,7 @@ fi
 fi
 
 export ENVIRONMENT=$1-$2
-export SDK_URL="https://$PARTNER.sdk.$STAGE.com/index.js"
+export SDK_URL="https://${PARTNER}${MODE}.sdk.${STAGE}.com/index.js"
 
 echo "Starting build $SDK_URL in `pwd`" ;
 
