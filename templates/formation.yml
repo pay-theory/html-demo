@@ -33,7 +33,7 @@ Resources:
   V2Route53NSRecordUpdater:
     Type: Custom::NSRecordUpdater
     Properties:
-      ServiceToken: !Sub '{{resolve:ssm:route53-recordset-updater-lambda-arn-${Partner}}}'
+      ServiceToken: !Sub '{{resolve:ssm:route53-recordset-updater-lambda-arn}}'
       DomainName: !Sub '${Stage}.com'
       SubdomainName: !If [ 
         isStandard, 
@@ -46,7 +46,7 @@ Resources:
     DependsOn:
       - V2Route53NSRecordUpdater
     Properties:
-      ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn-${Partner}}}'
+      ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn}}'
       DomainName: !If [ 
         isStandard, 
         !Sub "${Partner}.html.example.${Stage}.com", 
@@ -57,7 +57,7 @@ Resources:
     DependsOn:
       - V2Certificate
     Properties:
-      ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn-${Partner}}}'
+      ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn}}'
       CertificateArn: !GetAtt V2Certificate.CertificateArn           
 
   S3Bucket:
