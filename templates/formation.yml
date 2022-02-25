@@ -94,6 +94,7 @@ Resources:
   CloudFront:
     DependsOn:
       - V2CertificateValidator
+      - V2Certificate
     Type: 'AWS::CloudFront::Distribution'
     Properties:
       DistributionConfig:
