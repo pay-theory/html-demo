@@ -175,6 +175,9 @@ Resources:
           - Name: DISTRIBUTION
             Type: PLAINTEXT
             Value: !Ref CloudFront
+          - Name: GITHUB_ACCESS_TOKEN
+            Type: PLAINTEXT
+            Value: !Sub '{{resolve:ssm:/automation/git-hub-access-token}}'                 
       Source:
         Type: CODEPIPELINE
       TimeoutInMinutes: 20  
