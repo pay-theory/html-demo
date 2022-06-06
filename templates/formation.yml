@@ -171,7 +171,10 @@ Resources:
             Value: !Sub '${Partner}' 
           - Name: TARGET_MODE
             Type: PLAINTEXT
-            Value: !Sub '${TargetMode}'  
+            Value: !Sub '${TargetMode}'
+          - Name: SERVICE_TYPE
+            Type: PLAINTEXT
+            Value: examples
           - Name: DISTRIBUTION
             Type: PLAINTEXT
             Value: !Ref CloudFront
