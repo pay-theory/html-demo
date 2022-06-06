@@ -16,6 +16,8 @@ echo "STAGE :: $STAGE"
 echo "SERVICE_NAME :: $SERVICE_NAME"
 echo "SERVICE_TYPE :: $SERVICE_TYPE"
 echo "TARGET_MODE :: $TARGET_MODE"
+echo "S3_ARTIFACTS_BUCKET :: $S3_ARTIFACTS_BUCKET"
+echo "S3_ARTIFACTS_PATH :: $S3_ARTIFACTS_PATH"
 
 
 echo "Validating the cfn templates $(date) in $(pwd)" ;
