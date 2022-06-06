@@ -175,6 +175,9 @@ Resources:
           - Name: SERVICE_TYPE
             Type: PLAINTEXT
             Value: examples
+          - Name: SERVICE_NAME
+            Type: PLAINTEXT
+            Value: !Sub '${Repository}'
           - Name: DISTRIBUTION
             Type: PLAINTEXT
             Value: !Ref CloudFront
