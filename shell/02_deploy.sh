@@ -33,5 +33,3 @@ sam deploy --template-file ./templates/formation.yml \
 ParameterKey=Partner,ParameterValue="${PARTNER}" \
 ParameterKey=Stage,ParameterValue="${STAGE}" \
 ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}"
-
-if ! [ -z ${DISTRIBUTION+x} ]; then aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" ; fi;
