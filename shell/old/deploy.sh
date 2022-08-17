@@ -1,1 +1,0 @@
-aws s3 cp public s3://html-demo-$ACCOUNT_ID --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
