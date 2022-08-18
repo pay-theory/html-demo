@@ -1,7 +1,7 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/814cedb86cdb4ead94e04b02f0efc60f)](https://www.codacy.com/gh/pay-theory/html-demo/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=pay-theory/html-demo&amp;utm_campaign=Badge_Grade)
-
 # html-demo
-a demonstration of Pay Theory JavaScript SDK
+A demonstration page of Pay Theory JavaScript SDK
+
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/814cedb86cdb4ead94e04b02f0efc60f)](https://www.codacy.com/gh/pay-theory/html-demo/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=pay-theory/html-demo&amp;utm_campaign=Badge_Grade)
 
 ## Initial Deployment
 
