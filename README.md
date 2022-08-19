@@ -28,6 +28,7 @@ sh shell/formation.post.init.sh your-branch-name your-stage
 ```bash
 sh shell/deploy.sh
 ```
+
 *make sure you remove your build files after deploying*
 
 *everything below public/html*
