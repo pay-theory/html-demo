@@ -6,29 +6,22 @@ A demonstration page of Pay Theory JavaScript SDK
 
 ## Initial Deployment
 
-From the cloned repository with your branch checked out
+Replace values of these variables and export local environment variables in your cli
 
-Copy the following bash into a temp file
-
-Replace *YourBranchName* with the capitalized, camelcase version of your branch name
-Replace *your-branch-name* with the lower case, dashed version of your branch name
-
-edit the file created as *shell/formation.your-branch-name.sh*
-enter values for each environment variable set at top of file
-
-```bash
-sh shell/formation.init.sh your-branch-name your-stage
-sh shell/build_env.sh your-branch-name your-stage
-sh shell/deploy.sh
-sh shell/formation.post.init.sh your-branch-name your-stage
+```shell
+export TARGET_REGION=AWS_REGION ;
+export TARGET_ACCOUNT_ID=ACCOUNT_NUMBER;
+export PARTNER=PARTNER_NAME
+export GITHUB_ACCESS_TOKEN=GITHUB_ACCESS_TOKEN
+export STAGE=STAGE
+export SERVICE_TYPE=SERVICE_TYPE
+export SERVICE_NAME=SERVICE_NAME
+export TARGET_MODE=standard
 ```
 
-## Manual update deployment of project code
+Run bash shell commands in buildspec.yml
 
-```bash
-sh shell/deploy.sh
+```shell
+bash shell/01_prepare.sh $PARTNER $STAGE $SERVICE_TYPE $SERVICE_NAME $GITHUB_ACCESS_TOKEN $TARGET_MODE
+bash shell/02_deploy.sh $PARTNER $STAGE $SERVICE_TYPE $SERVICE_NAME $TARGET_MODE   
 ```
-
-*make sure you remove your build files after deploying*
-
-*everything below public/html*
