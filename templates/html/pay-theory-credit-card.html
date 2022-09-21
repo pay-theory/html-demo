@@ -23,6 +23,7 @@
             </div>
             <div id="result-text" />
             <div><em>you must replace YOUR-API-KEY in the URL to load the SDK</em></div>
+            <div id="loading-status" style="color:white" />
         </div>
         </div>
         <script type="text/javascript">
@@ -74,6 +75,7 @@
                         paymentButton
                             .addEventListener("click", (e) => {
                                 e.preventDefault();
+                                document.getElementById("loading-status").textContent = "pay theory loading complete";
                                 const statusContainer = document.getElementById("result-text");
                                 statusContainer.textContent = "";
                                 statusContainer.appendChild(document.createTextNode("working"));
