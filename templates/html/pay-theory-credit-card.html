@@ -72,10 +72,11 @@
                     myCreditCard.readyObserver(ready => {
                         console.log('ready', ready)
                         const paymentButton = document.getElementById('submit-payment')
+                        const loading = document.getElementById("loading-status");
+                        loading.textContent = "pay theory loading complete";
                         paymentButton
                             .addEventListener("click", (e) => {
                                 e.preventDefault();
-                                document.getElementById("loading-status").textContent = "pay theory loading complete";
                                 const statusContainer = document.getElementById("result-text");
                                 statusContainer.textContent = "";
                                 statusContainer.appendChild(document.createTextNode("working"));
