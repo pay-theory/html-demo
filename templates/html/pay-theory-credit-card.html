@@ -29,7 +29,7 @@
         <script type="text/javascript">
             // API KEY is required
             const urlParams = new URLSearchParams(window.location.search)
-            // const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
+            const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
             console.log('apikey',API_KEY)
             const AMOUNT = 5000
             const first_name = urlParams.get('first_name') ? urlParams.get('first_name') : 'Html'
