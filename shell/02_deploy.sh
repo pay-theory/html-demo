@@ -26,6 +26,8 @@ echo "Starting SAM build $(date) in $(pwd)" ;
 
 aws s3 cp public s3://html-demo-"${TARGET_ACCOUNT_ID}"-"${PARTNER}"-"${STAGE}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --recursive
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 sam deploy --template-file ./templates/formation.yml \
 --stack-name html-example-"${PARTNER}"-"${STAGE}" \
 --region "${TARGET_REGION}" \
@@ -34,6 +36,13 @@ sam deploy --template-file ./templates/formation.yml \
 --parameter-overrides \
 ParameterKey=Partner,ParameterValue="${PARTNER}" \
 ParameterKey=Stage,ParameterValue="${STAGE}" \
-ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}"
+ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}" | tee "${SCRIPT_DIR}"/error_check.txt
+
+if grep -i -q -E "error|failed|UPDATE_ROLLBACK_COMPLETE" "${SCRIPT_DIR}"/error_check.txt; then
+    echo "Failed to update!"
+    exit 1
+else
+    echo "No errors or failures found"
+fi
 
 if ! [ -z ${DISTRIBUTION+x} ]; then aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" ; fi;
