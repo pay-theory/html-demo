@@ -36,9 +36,9 @@ sam deploy --template-file ./templates/formation.yml \
 --parameter-overrides \
 ParameterKey=Partner,ParameterValue="${PARTNER}" \
 ParameterKey=Stage,ParameterValue="${STAGE}" \
-ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}" | tee "${SCRIPT_DIR}"/error_check.txt
+ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}" | tee "${SCRIPT_DIR}"/error_check_one.txt
 
-if grep -i -q -E "error|failed|UPDATE_ROLLBACK_COMPLETE" "${SCRIPT_DIR}"/error_check.txt; then
+if grep -i -q -E "error|failed|UPDATE_ROLLBACK_COMPLETE" "${SCRIPT_DIR}"/error_check_one.txt; then
     echo "Failed to update!"
     exit 1
 else
