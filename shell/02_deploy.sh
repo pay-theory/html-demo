@@ -41,6 +41,9 @@ ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}" | tee "${SCRIPT_DIR}"/er
 if grep -i -q -E "error|failed|UPDATE_ROLLBACK_COMPLETE" "${SCRIPT_DIR}"/error_check_one.txt; then
     echo "Failed to update!"
     exit 1
+elif [ ! -f "${SCRIPT_DIR}"/error_check_one.txt  ]; then
+    echo "Error check files are missing."
+    exit 1
 else
     echo "No errors or failures found"
 fi
