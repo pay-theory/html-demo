@@ -177,7 +177,10 @@ Resources:
             Value: !Ref CloudFront
           - Name: GITHUB_ACCESS_TOKEN
             Type: PLAINTEXT
-            Value: !Sub '{{resolve:ssm:/automation/git-hub-access-token}}'                 
+            Value: !Sub '{{resolve:ssm:/automation/git-hub-access-token}}'
+          - Name: TARGET_REGION
+            Type: PLAINTEXT
+            Value: !Sub '${AWS::Region}'
       Source:
         Type: CODEPIPELINE
       TimeoutInMinutes: 20  
