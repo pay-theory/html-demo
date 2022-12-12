@@ -47,5 +47,3 @@ elif [ ! -f "${SCRIPT_DIR}"/error_check_one.txt  ]; then
 else
     echo "No errors or failures found"
 fi
-
-if ! [ -z ${DISTRIBUTION+x} ]; then aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" ; fi;
