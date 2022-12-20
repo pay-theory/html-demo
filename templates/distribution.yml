@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Secure Tags Library Deployment
+Parameters:
+  Partner:
+    Type: String
+    Description: The environment you're deploying to.
+  Stage:
+    Type: String
+    Description: Library stage to use.
+  Repository:
+    Type: String
+    Description: The repository you are deploying from.
+    Default: html-demo
+  TargetMode:
+    Type: String
+    Description: The Deployment Mode
+    Default: standard
+    AllowedValues:
+      - standard
+      - '-new'
+      - '-old'
+Conditions:
+  isStandard: !Equals [ !Ref TargetMode, standard]
+Resources:
+  V2HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !If [
+        isStandard,
+        !Sub "${Partner}.html.example.${Stage}.com",
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
+
+  V2Route53NSRecordUpdater:
+    Type: Custom::NSRecordUpdater
+    Properties:
+      ServiceToken: !Sub '{{resolve:ssm:route53-recordset-updater-lambda-arn}}'
+      DomainName: !Sub '${Stage}.com'
+      SubdomainName: !If [
+        isStandard,
+        !Sub "${Partner}.html.example.${Stage}.com",
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
+      NameServersList: !GetAtt "V2HostedZone.NameServers"
+
+  V2Certificate:
+    Type: Custom::Certificate
+    DependsOn:
+      - V2Route53NSRecordUpdater
+    Properties:
+      ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn}}'
+      DomainName: !If [
+        isStandard,
+        !Sub "${Partner}.html.example.${Stage}.com",
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
+
+  V2CertificateValidator:
+    Type: Custom::CertificateValidator
+    DependsOn:
+      - V2Certificate
+    Properties:
+      ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn}}'
+      CertificateArn: !GetAtt V2Certificate.CertificateArn
+
+  HostedZoneParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '${Repository}-${Partner}-${Stage}-hosted-zone'
+      Type: String
+      Value: !Ref V2HostedZone
+      Description: !Sub 'Hosted zone for ${Repository}-${Partner}-${Stage}'
+
+  CertificateArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '${Repository}-${Partner}-${Stage}-certificate-arn'
+      Type: String
+      Value: !GetAtt V2Certificate.CertificateArn
+      Description: !Sub 'Certificate arn for ${Repository}-${Partner}-${Stage}'
+
+Outputs:
+  Renew:
+    Description: Trigger to update/rebuild formation
+    Value: 'Mar 14 2022'
