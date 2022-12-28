@@ -62,8 +62,7 @@ Resources:
 
   CloudFront:
     DependsOn:
-      - V2CertificateValidator
-      - V2Certificate
+      - S3Bucket
     Type: 'AWS::CloudFront::Distribution'
     Properties:
       DistributionConfig:
