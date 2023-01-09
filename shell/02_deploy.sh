@@ -6,7 +6,7 @@ SERVICE_TYPE=$3
 SERVICE_NAME=$4
 TARGET_MODE=$5
 
-S3_ARTIFACTS_BUCKET="partner-services-deployment-${TARGET_ACCOUNT_ID}"
+S3_ARTIFACTS_BUCKET="partner-services-deployment-${PARTNER}-${TARGET_ACCOUNT_ID}-${TARGET_REGION}"
 S3_ARTIFACTS_PATH="code/${SERVICE_NAME}-${PARTNER}-${STAGE}"
 
 
@@ -28,6 +28,22 @@ aws s3 cp public s3://html-demo-"${TARGET_ACCOUNT_ID}"-"${PARTNER}"-"${STAGE}" -
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+echo "Deploying certificates and hosted zone resources"
+sam deploy --template-file ./templates/distribution.yml \
+--stack-name "${SERVICE_NAME}"-distribution-"${PARTNER}"-"${STAGE}" \
+--region "us-east-1" \
+--capabilities CAPABILITY_IAM \
+--no-fail-on-empty-changeset \
+--parameter-overrides \
+ParameterKey=Partner,ParameterValue="${PARTNER}" \
+ParameterKey=Stage,ParameterValue="${STAGE}" \
+ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}"
+
+echo "Retrieving hosted zone" ;
+HOSTED_ZONE=$(aws --region="us-east-1" ssm get-parameters --name "${SERVICE_NAME}-${PARTNER}-${STAGE}-hosted-zone" --output text --query "Parameters[0].Value")
+echo "Retrieving certificate" ;
+CERTIFICATE_ARN=$(aws --region="us-east-1" ssm get-parameters --name "${SERVICE_NAME}-${PARTNER}-${STAGE}-certificate-arn" --output text --query "Parameters[0].Value")
+
 sam deploy --template-file ./templates/formation.yml \
 --stack-name html-example-"${PARTNER}"-"${STAGE}" \
 --region "${TARGET_REGION}" \
@@ -36,7 +52,9 @@ sam deploy --template-file ./templates/formation.yml \
 --parameter-overrides \
 ParameterKey=Partner,ParameterValue="${PARTNER}" \
 ParameterKey=Stage,ParameterValue="${STAGE}" \
-ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}" | tee "${SCRIPT_DIR}"/error_check_one.txt
+ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}" \
+ParameterKey=HostedZone,ParameterValue="${HOSTED_ZONE}" \
+ParameterKey=CertificateArn,ParameterValue="${CERTIFICATE_ARN}" | tee "${SCRIPT_DIR}"/error_check_one.txt
 
 if grep -i -q -E "error|failed|UPDATE_ROLLBACK_COMPLETE" "${SCRIPT_DIR}"/error_check_one.txt; then
     echo "Failed to update!"
@@ -47,5 +65,3 @@ elif [ ! -f "${SCRIPT_DIR}"/error_check_one.txt  ]; then
 else
     echo "No errors or failures found"
 fi
-
-if ! [ -z ${DISTRIBUTION+x} ]; then aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" ; fi;
