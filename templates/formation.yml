@@ -18,47 +18,16 @@ Parameters:
     AllowedValues:
         - standard
         - '-new'
-        - '-old'    
+        - '-old'
+  HostedZone:
+    Type: String
+    Description: v2 hosted zone
+  CertificateArn:
+    Type: String
+    Description: v2 certificate arn
 Conditions:
     isStandard: !Equals [ !Ref TargetMode, standard]  
 Resources:
-  V2HostedZone:
-    Type: AWS::Route53::HostedZone
-    Properties:
-      Name: !If [ 
-        isStandard, 
-        !Sub "${Partner}.html.example.${Stage}.com", 
-        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
-
-  V2Route53NSRecordUpdater:
-    Type: Custom::NSRecordUpdater
-    Properties:
-      ServiceToken: !Sub '{{resolve:ssm:route53-recordset-updater-lambda-arn}}'
-      DomainName: !Sub '${Stage}.com'
-      SubdomainName: !If [ 
-        isStandard, 
-        !Sub "${Partner}.html.example.${Stage}.com", 
-        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
-      NameServersList: !GetAtt "V2HostedZone.NameServers"
-
-  V2Certificate:
-    Type: Custom::Certificate
-    DependsOn:
-      - V2Route53NSRecordUpdater
-    Properties:
-      ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn}}'
-      DomainName: !If [ 
-        isStandard, 
-        !Sub "${Partner}.html.example.${Stage}.com", 
-        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
-
-  V2CertificateValidator:
-    Type: Custom::CertificateValidator
-    DependsOn:
-      - V2Certificate
-    Properties:
-      ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn}}'
-      CertificateArn: !GetAtt V2Certificate.CertificateArn           
 
   S3Bucket:
     Type: 'AWS::S3::Bucket'
@@ -93,8 +62,7 @@ Resources:
 
   CloudFront:
     DependsOn:
-      - V2CertificateValidator
-      - V2Certificate
+      - S3Bucket
     Type: 'AWS::CloudFront::Distribution'
     Properties:
       DistributionConfig:
@@ -130,7 +98,7 @@ Resources:
             OriginPath: !Sub '/${Stage}/${Partner}'
             Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
         ViewerCertificate:
-          AcmCertificateArn: !GetAtt V2Certificate.CertificateArn
+          AcmCertificateArn: !Sub '${CertificateArn}'
           MinimumProtocolVersion: TLSv1.2_2021
           SslSupportMethod: 'sni-only'
   Route53:
@@ -138,7 +106,7 @@ Resources:
       - CloudFront
     Type: 'AWS::Route53::RecordSetGroup'
     Properties:
-      HostedZoneId: !Ref V2HostedZone
+      HostedZoneId: !Sub '${HostedZone}'
       RecordSets:
         -
           Name: !If [ 
@@ -177,7 +145,10 @@ Resources:
             Value: !Ref CloudFront
           - Name: GITHUB_ACCESS_TOKEN
             Type: PLAINTEXT
-            Value: !Sub '{{resolve:ssm:/automation/git-hub-access-token}}'                 
+            Value: !Sub '{{resolve:ssm:/automation/git-hub-access-token}}'
+          - Name: TARGET_REGION
+            Type: PLAINTEXT
+            Value: !Sub '${AWS::Region}'
       Source:
         Type: CODEPIPELINE
       TimeoutInMinutes: 20  
