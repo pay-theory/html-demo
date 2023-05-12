@@ -243,7 +243,7 @@ Resources:
         Origins:
           -
             DomainName: !Sub "${S3Bucket}.s3.${AWS::Region}.amazonaws.com"
-            Id: !Sub '${Repository}-${Partner}-${Stage}'
+            Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
             S3OriginConfig:
               OriginAccessIdentity: ''
             OriginPath: !Sub '/${Stage}/${Partner}'
