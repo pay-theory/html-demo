@@ -98,7 +98,7 @@ Resources:
   LoggingBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}-log'
+      BucketName: !Sub '${Repository}-${Partner}-${Stage}-log'
       LifecycleConfiguration:
         Rules:
           - Id: GlacierRule
@@ -142,7 +142,7 @@ Resources:
   BackupBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}-backup'
+      BucketName: !Sub '${Repository}-${Partner}-${Stage}-backup'
       LifecycleConfiguration:
         Rules:
           - Id: GlacierRule
