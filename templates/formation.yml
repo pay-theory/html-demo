@@ -161,7 +161,17 @@ Resources:
         !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
         CustomErrorResponses:
           -
-            ErrorCachingMinTTL: 15
+            ErrorCachingMinTTL: 10
+            ErrorCode: 400
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          -
+            ErrorCachingMinTTL: 10
+            ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          -
+            ErrorCachingMinTTL: 10
             ErrorCode: 404
             ResponseCode: 200
             ResponsePagePath: /index.html
