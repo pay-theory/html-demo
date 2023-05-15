@@ -31,8 +31,6 @@ Resources:
 
   S3Bucket:
     DependsOn:
-      - LoggingBucket
-      - BackupBucket
       - S3BucketBackupRole
     Type: 'AWS::S3::Bucket'
     Properties:
@@ -51,8 +49,8 @@ Resources:
               - TransitionInDays: 1
                 StorageClass: INTELLIGENT_TIERING
       LoggingConfiguration:
-        DestinationBucketName: !Ref LoggingBucket
-        LogFilePrefix: access-logs
+        DestinationBucketName: !Sub 'partner-services-deployment-${Partner}-logging'
+        LogFilePrefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
       VersioningConfiguration:
         Status: Enabled
       ReplicationConfiguration:
@@ -61,10 +59,10 @@ Resources:
           - Arn
         Rules:
           - Destination:
-              Bucket: !GetAtt BackupBucket.Arn
+              Bucket: !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
               StorageClass: GLACIER
             Id: Backup
-            Prefix: ''
+            Prefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
             Status: Enabled
     DeletionPolicy: Delete
 
@@ -94,67 +92,6 @@ Resources:
             Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
             Principal:
               AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/pt-global-codebuild-role'
-
-  LoggingBucket:
-    Type: 'AWS::S3::Bucket'
-    Properties:
-      BucketName: !Sub '${Repository}-${Partner}-${Stage}-log'
-      LifecycleConfiguration:
-        Rules:
-          - Id: GlacierRule
-            Prefix: glacier
-            Status: Enabled
-            ExpirationInDays: 365
-            Transitions:
-              - TransitionInDays: 1
-                StorageClass: GLACIER
-      VersioningConfiguration:
-        Status: Enabled
-    DeletionPolicy: Delete
-
-  LoggingBucketPolicy:
-    DependsOn:
-      - LoggingBucket
-    Type: 'AWS::S3::BucketPolicy'
-    Properties:
-      Bucket: !Ref LoggingBucket
-      PolicyDocument:
-        Statement:
-          - Sid: 'AllowS3Logging'
-            Action:
-              - 's3:PutObject'
-            Effect: Allow
-            Principal:
-              Service: logging.s3.amazonaws.com
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref LoggingBucket
-                - /*
-            Condition:
-              ArnLike:
-                'aws:SourceArn': !GetAtt
-                  - LoggingBucket
-                  - Arn
-              StringEquals:
-                'aws:SourceAccount': !Sub '${AWS::AccountId}'
-
-  BackupBucket:
-    Type: 'AWS::S3::Bucket'
-    Properties:
-      BucketName: !Sub '${Repository}-${Partner}-${Stage}-backup'
-      LifecycleConfiguration:
-        Rules:
-          - Id: GlacierRule
-            Prefix: glacier
-            Status: Enabled
-            ExpirationInDays: 365
-            Transitions:
-              - TransitionInDays: 1
-                StorageClass: GLACIER
-      VersioningConfiguration:
-        Status: Enabled
-    DeletionPolicy: Delete
 
   S3BucketBackupRole:
     Type: 'AWS::IAM::Role'
