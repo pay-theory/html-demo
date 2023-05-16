@@ -30,39 +30,127 @@ Conditions:
 Resources:
 
   S3Bucket:
+    DependsOn:
+      - S3BucketBackupRole
     Type: 'AWS::S3::Bucket'
     Properties:
-      AccessControl: PublicRead
       BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
       MetricsConfigurations:
         - Id: EntireBucket
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: index.html
+      LifecycleConfiguration:
+        Rules:
+          - Id: NonCurrentRetention
+            Status: Enabled
+            ExpirationInDays: 365
+            NoncurrentVersionExpiration:
+              NewerNoncurrentVersions: 5
+              NoncurrentDays: 7
+            Transitions:
+              - TransitionInDays: 1
+                StorageClass: INTELLIGENT_TIERING
+      LoggingConfiguration:
+        DestinationBucketName: !Sub 'partner-services-deployment-${Partner}-logging'
+        LogFilePrefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+      VersioningConfiguration:
+        Status: Enabled
+      ReplicationConfiguration:
+        Role: !GetAtt
+          - S3BucketBackupRole
+          - Arn
+        Rules:
+          - Destination:
+              Bucket: !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
+              StorageClass: GLACIER
+            Id: Backup
+            Prefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+            Status: Enabled
     DeletionPolicy: Delete
+
   BucketPolicy:
     DependsOn:
       - S3Bucket
+      - CloudFront
     Type: 'AWS::S3::BucketPolicy'
     Properties:
       Bucket: !Ref S3Bucket
       PolicyDocument:
         Statement:
-          - Action:
+          - Sid: 'AllowCloudFrontServicePrincipalReadOnly'
+            Effect: 'Allow'
+            Principal:
+              Service: 'cloudfront.amazonaws.com'
+            Action: 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
+            Condition:
+              StringEquals:
+                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFront}'
+          - Sid: 'AllowPtGlobalCodebuildRole'
+            Action:
               - 's3:GetObject'
+              - 's3:PutObject'
             Effect: Allow
             Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
-            Principal: '*'
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/pt-global-codebuild-role'
+
+  S3BucketBackupRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
           - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - s3.amazonaws.com
+
+  BucketBackupPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 's3:GetReplicationConfiguration'
               - 's3:ListBucket'
             Effect: Allow
-            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
-            Principal: '*'    
-    
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3Bucket
+          - Action:
+              - 's3:GetObjectVersion'
+              - 's3:GetObjectVersionAcl'
+            Effect: Allow
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3Bucket
+                  - /*
+          - Action:
+              - 's3:ReplicateObject'
+              - 's3:ReplicateDelete'
+            Effect: Allow
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Join
+                    - '-'
+                    - - !Ref 'AWS::Region'
+                      - !Ref 'AWS::StackName'
+                      - replicationbucket
+                  - /*
+      PolicyName: BucketBackupPolicy
+      Roles:
+        - !Ref S3BucketBackupRole
 
   CloudFront:
     DependsOn:
       - S3Bucket
+      - CloudFrontOAC
     Type: 'AWS::CloudFront::Distribution'
     Properties:
       DistributionConfig:
@@ -73,7 +161,17 @@ Resources:
         !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
         CustomErrorResponses:
           -
-            ErrorCachingMinTTL: 15
+            ErrorCachingMinTTL: 10
+            ErrorCode: 400
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          -
+            ErrorCachingMinTTL: 10
+            ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          -
+            ErrorCachingMinTTL: 10
             ErrorCode: 404
             ResponseCode: 200
             ResponsePagePath: /index.html
@@ -90,17 +188,28 @@ Resources:
         IPV6Enabled: true
         Enabled: true
         Origins:
-          - CustomOriginConfig:
-              OriginProtocolPolicy: 'http-only'
-              OriginSSLProtocols:
-                - TLSv1.2
-            DomainName: !Sub "${S3Bucket}.s3-website-${AWS::Region}.amazonaws.com"
-            OriginPath: !Sub '/${Stage}/${Partner}'
+          -
+            DomainName: !Sub "${S3Bucket}.s3.${AWS::Region}.amazonaws.com"
             Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginPath: !Sub '/${Stage}/${Partner}'
+            OriginAccessControlId: !Ref CloudFrontOAC
         ViewerCertificate:
           AcmCertificateArn: !Sub '${CertificateArn}'
           MinimumProtocolVersion: TLSv1.2_2021
           SslSupportMethod: 'sni-only'
+
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: !Sub '${Repository}-${Partner}-${Stage} OAC'
+        Name: !Sub '${Repository}-${Partner}-${Stage} OAC'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
   Route53:
     DependsOn:
       - CloudFront
