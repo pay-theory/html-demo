@@ -35,6 +35,12 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !Sub '{{resolve:ssm:pt-keys-s3-bucket-sym-key:1}}'
+            BucketKeyEnabled: true  
       MetricsConfigurations:
         - Id: EntireBucket
       LifecycleConfiguration:
