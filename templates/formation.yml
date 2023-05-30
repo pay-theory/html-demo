@@ -39,7 +39,7 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: 'aws:kms'
-              KMSMasterKeyID: !Sub '{{resolve:ssm:pt-keys-s3-bucket-sym-key:1}}'
+              KMSMasterKeyID: !Sub '{{resolve:ssm:pt-keys-s3-bucket-sym-key}}'
             BucketKeyEnabled: true  
       MetricsConfigurations:
         - Id: EntireBucket
