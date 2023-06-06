@@ -100,7 +100,9 @@ Resources:
               AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/pt-global-codebuild-role'
 
   S3BucketBackupRole:
-    Type: 'AWS::IAM::Role'
+    DependsOn:
+      - BucketBackupPolicy
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -110,11 +112,16 @@ Resources:
             Principal:
               Service:
                 - s3.amazonaws.com
+      ManagedPolicyArns:
+        - !Ref BucketBackupPolicy
 
   BucketBackupPolicy:
-    Type: 'AWS::IAM::Policy'
+    Type: 'AWS::IAM::ManagedPolicy'
     Properties:
+      Description: !Sub 'Policy for ${Repository}-${Partner}-${Stage}'
+      ManagedPolicyName: !Sub '${Repository}-${Partner}-${Stage}-backup'
       PolicyDocument:
+        Version: "2012-10-17"
         Statement:
           - Action:
               - 's3:GetReplicationConfiguration'
@@ -149,9 +156,6 @@ Resources:
                       - !Ref 'AWS::StackName'
                       - replicationbucket
                   - /*
-      PolicyName: BucketBackupPolicy
-      Roles:
-        - !Ref S3BucketBackupRole
 
   CloudFront:
     DependsOn:
