@@ -85,6 +85,15 @@ Resources:
       Bucket: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
       PolicyDocument:
         Statement:
+          - Sid: 'SecureTransport'
+            Action:
+              - 's3:*'
+            Effect: Deny
+            Principal: "*"
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: false
           - Sid: 'AllowCloudFrontServicePrincipalReadOnly'
             Effect: 'Allow'
             Principal:
