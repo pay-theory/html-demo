@@ -65,3 +65,27 @@ elif [ ! -f "${SCRIPT_DIR}"/error_check_one.txt  ]; then
 else
     echo "No errors or failures found"
 fi
+
+echo "Retrieving cloudwatch kms key" ;
+KMS_KEY_ID=$(aws --region="${TARGET_REGION}" ssm get-parameters --name "pt-keys-cloudwatch-sym-key" --output text --query "Parameters[0].Value")
+if [[ ${KMS_KEY_ID} != *"arn"* ]]
+then
+    echo "Failed to retrieve cloudwatch kms key!"
+    exit 1
+else
+    echo "Cloudwatch kms key retrieved..."
+fi
+
+# Define the log groups
+CODEBUILD_LOG_GROUP_NAME="/aws/codebuild/cb-${SERVICE_NAME}-${PARTNER}-${STAGE}"
+
+# Check if the log group exists
+GET_CODEBUILD_LOG_RESPONSE=$(aws --region="${TARGET_REGION}" logs describe-log-groups --log-group-name-prefix "${CODEBUILD_LOG_GROUP_NAME}" --query 'logGroups[?logGroupName==`'"${CODEBUILD_LOG_GROUP_NAME}"'`].logGroupName' --output text)
+
+if [[ ${GET_CODEBUILD_LOG_RESPONSE} != *"/aws/"* ]]
+then
+    echo "Log group does not exist!"
+else
+    echo "Log group exists, associating kms key... "
+    aws logs --region="${TARGET_REGION}" associate-kms-key --log-group-name "${CODEBUILD_LOG_GROUP_NAME}" --kms-key-id "${KMS_KEY_ID}"
+fi
