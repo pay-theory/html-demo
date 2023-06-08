@@ -41,6 +41,11 @@ Resources:
               SSEAlgorithm: 'aws:kms'
               KMSMasterKeyID: !Sub '{{resolve:ssm:pt-keys-s3-bucket-sym-key}}'
             BucketKeyEnabled: true  
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       MetricsConfigurations:
         - Id: EntireBucket
       LifecycleConfiguration:
