@@ -47,7 +47,7 @@ CERTIFICATE_ARN=$(aws --region="us-east-1" ssm get-parameters --name "${SERVICE_
 sam deploy --template-file ./templates/formation.yml \
 --stack-name html-example-"${PARTNER}"-"${STAGE}" \
 --region "${TARGET_REGION}" \
---capabilities CAPABILITY_IAM \
+--capabilities CAPABILITY_NAMED_IAM \
 --no-fail-on-empty-changeset \
 --parameter-overrides \
 ParameterKey=Partner,ParameterValue="${PARTNER}" \
