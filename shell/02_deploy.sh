@@ -56,7 +56,7 @@ ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}" \
 ParameterKey=HostedZone,ParameterValue="${HOSTED_ZONE}" \
 ParameterKey=CertificateArn,ParameterValue="${CERTIFICATE_ARN}" | tee "${SCRIPT_DIR}"/error_check_one.txt
 
-if grep -i -q -E "UPDATE_ROLLBACK_COMPLETE|UPDATE_ROLLBACK_FAILED|error|ValidationError|(Throttling)|failure" "${SCRIPT_DIR}"/error_check_one.txt; then
+if grep -i -q -E "UPDATE_ROLLBACK_COMPLETE|UPDATE_ROLLBACK_FAILED|error|ValidationError|(Throttling)|failure|Failed to create changeset|An error occurred" "${SCRIPT_DIR}"/error_check_one.txt; then
     echo "Failed to update!"
     exit 1
 elif [ ! -f "${SCRIPT_DIR}"/error_check_one.txt  ]; then
