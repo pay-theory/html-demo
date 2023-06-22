@@ -21,8 +21,7 @@ echo "S3_ARTIFACTS_PATH :: $S3_ARTIFACTS_PATH"
 
 
 echo "Validating the cfn templates $(date) in $(pwd)" ;
-sam validate -t ./templates/formation.yml ;
-echo "Starting SAM build $(date) in $(pwd)" ;
+aws cloudformation validate-template --template-body file://templates/formation.yml ;
 
 aws s3 cp public s3://html-demo-"${TARGET_ACCOUNT_ID}"-"${PARTNER}"-"${STAGE}" --recursive
 
