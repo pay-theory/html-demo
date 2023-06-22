@@ -28,7 +28,7 @@ aws s3 cp public s3://html-demo-"${TARGET_ACCOUNT_ID}"-"${PARTNER}"-"${STAGE}" -
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 echo "Deploying certificates and hosted zone resources"
-sam deploy --template-file ./templates/distribution.yml \
+aws cloudformation deploy --template-file ./templates/distribution.yml \
 --stack-name "${SERVICE_NAME}"-distribution-"${PARTNER}"-"${STAGE}" \
 --region "us-east-1" \
 --capabilities CAPABILITY_IAM \
@@ -43,7 +43,7 @@ HOSTED_ZONE=$(aws --region="us-east-1" ssm get-parameters --name "${SERVICE_NAME
 echo "Retrieving certificate" ;
 CERTIFICATE_ARN=$(aws --region="us-east-1" ssm get-parameters --name "${SERVICE_NAME}-${PARTNER}-${STAGE}-certificate-arn" --output text --query "Parameters[0].Value")
 
-sam deploy --template-file ./templates/formation.yml \
+aws cloudformation deploy --template-file ./templates/formation.yml \
 --stack-name html-example-"${PARTNER}"-"${STAGE}" \
 --region "${TARGET_REGION}" \
 --capabilities CAPABILITY_NAMED_IAM \
