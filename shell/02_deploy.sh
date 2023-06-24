@@ -37,7 +37,7 @@ ParameterKey=Stage,ParameterValue="${STAGE}" \
 ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}"
 
 # Check the status of cloudformation stack set
-STATUS=$(aws cloudformation describe-stacks --stack-name "${SERVICE_NAME}"-distribution-"${PARTNER}"-"${STAGE}" --output text --query "Stacks[0].StackStatus")
+STATUS=$(aws cloudformation describe-stacks --region "us-east-1" --stack-name "${SERVICE_NAME}"-distribution-"${PARTNER}"-"${STAGE}" --output text --query "Stacks[0].StackStatus")
 if [ "$STATUS" = "CREATE_COMPLETE" ] || [ "$STATUS" = "UPDATE_COMPLETE" ]; then
   echo "The cloudformation stack set is complete"
 else
