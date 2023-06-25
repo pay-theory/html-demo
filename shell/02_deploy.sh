@@ -23,7 +23,7 @@ aws cloudformation validate-template --template-body file://templates/formation.
 
 aws s3 cp public s3://html-demo-"${TARGET_ACCOUNT_ID}"-"${PARTNER}"-"${STAGE}" --recursive
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 
 echo "Deploying certificates and hosted zone resources"
 aws cloudformation deploy --template-file ./templates/distribution.yml \
