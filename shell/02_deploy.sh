@@ -38,8 +38,12 @@ ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}"
 
 # Check the status of cloudformation stack set
 STATUS=$(aws cloudformation describe-stacks --region "us-east-1" --stack-name "${SERVICE_NAME}"-distribution-"${PARTNER}"-"${STAGE}" --output text --query "Stacks[0].StackStatus")
-if [ "$STATUS" = "CREATE_COMPLETE" ] || [ "$STATUS" = "UPDATE_COMPLETE" ]; then
-  echo "The cloudformation stack set is complete"
+if [ "$STATUS" = "CREATE_COMPLETE" ]; then
+  echo "The cloudformation stack set has been created successfully"
+elif [ "$STATUS" = "UPDATE_COMPLETE" ]; then
+  echo "The cloudformation stack set has been updated successfully"
+elif [ "$STATUS" = "UPDATE_IN_PROGRESS" ]; then
+  echo "The cloudformation stack set is currently being updated"
 else
   echo "The cloudformation stack failed to complete"
   exit 1
@@ -64,8 +68,12 @@ ParameterKey=CertificateArn,ParameterValue="${CERTIFICATE_ARN}"
 
 # Check the status of cloudformation stack set
 STATUS=$(aws cloudformation describe-stacks --stack-name html-example-"${PARTNER}"-"${STAGE}" --output text --query "Stacks[0].StackStatus")
-if [ "$STATUS" = "CREATE_COMPLETE" ] || [ "$STATUS" = "UPDATE_COMPLETE" ]; then
-  echo "The cloudformation stack set is complete"
+if [ "$STATUS" = "CREATE_COMPLETE" ]; then
+  echo "The cloudformation stack set has been created successfully"
+elif [ "$STATUS" = "UPDATE_COMPLETE" ]; then
+  echo "The cloudformation stack set has been updated successfully"
+elif [ "$STATUS" = "UPDATE_IN_PROGRESS" ]; then
+  echo "The cloudformation stack set is currently being updated"
 else
   echo "The cloudformation stack failed to complete"
   exit 1
