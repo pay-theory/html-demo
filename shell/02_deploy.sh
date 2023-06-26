@@ -32,9 +32,9 @@ aws cloudformation deploy --template-file ./templates/distribution.yml \
 --capabilities CAPABILITY_IAM \
 --no-fail-on-empty-changeset \
 --parameter-overrides \
-ParameterKey=Partner,ParameterValue="${PARTNER}" \
-ParameterKey=Stage,ParameterValue="${STAGE}" \
-ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}"
+Partner="${PARTNER}" \
+Stage="${STAGE}" \
+TargetMode="${TARGET_MODE}"
 
 # Check the status of cloudformation stack set
 STATUS=$(aws cloudformation describe-stacks --region "us-east-1" --stack-name "${SERVICE_NAME}"-distribution-"${PARTNER}"-"${STAGE}" --output text --query "Stacks[0].StackStatus")
@@ -60,11 +60,11 @@ aws cloudformation deploy --template-file ./templates/formation.yml \
 --capabilities CAPABILITY_NAMED_IAM \
 --no-fail-on-empty-changeset \
 --parameter-overrides \
-ParameterKey=Partner,ParameterValue="${PARTNER}" \
-ParameterKey=Stage,ParameterValue="${STAGE}" \
-ParameterKey=TargetMode,ParameterValue="${TARGET_MODE}" \
-ParameterKey=HostedZone,ParameterValue="${HOSTED_ZONE}" \
-ParameterKey=CertificateArn,ParameterValue="${CERTIFICATE_ARN}"
+Partner="${PARTNER}" \
+Stage="${STAGE}" \
+TargetMode="${TARGET_MODE}" \
+HostedZone="${HOSTED_ZONE}" \
+CertificateArn="${CERTIFICATE_ARN}"
 
 # Check the status of cloudformation stack set
 STATUS=$(aws cloudformation describe-stacks --stack-name html-example-"${PARTNER}"-"${STAGE}" --output text --query "Stacks[0].StackStatus")
