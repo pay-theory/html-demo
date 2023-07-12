@@ -35,6 +35,17 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !Sub '{{resolve:ssm:pt-keys-s3-bucket-sym-key}}'
+            BucketKeyEnabled: true  
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       MetricsConfigurations:
         - Id: EntireBucket
       LifecycleConfiguration:
@@ -68,13 +79,21 @@ Resources:
 
   BucketPolicy:
     DependsOn:
-      - S3Bucket
       - CloudFront
     Type: 'AWS::S3::BucketPolicy'
     Properties:
-      Bucket: !Ref S3Bucket
+      Bucket: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
       PolicyDocument:
         Statement:
+          - Sid: 'SecureTransport'
+            Action:
+              - 's3:*'
+            Effect: Deny
+            Principal: "*"
+            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: false
           - Sid: 'AllowCloudFrontServicePrincipalReadOnly'
             Effect: 'Allow'
             Principal:
@@ -94,7 +113,9 @@ Resources:
               AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/pt-global-codebuild-role'
 
   S3BucketBackupRole:
-    Type: 'AWS::IAM::Role'
+    DependsOn:
+      - BucketBackupManagedPolicy
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -104,52 +125,38 @@ Resources:
             Principal:
               Service:
                 - s3.amazonaws.com
+      ManagedPolicyArns:
+        - !Ref BucketBackupManagedPolicy
 
-  BucketBackupPolicy:
-    Type: 'AWS::IAM::Policy'
+  BucketBackupManagedPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
     Properties:
+      Description: !Sub 'Policy for ${Repository}-${Partner}-${Stage}'
+      ManagedPolicyName: !Sub '${Repository}-${Partner}-${Stage}-backup'
       PolicyDocument:
+        Version: "2012-10-17"
         Statement:
           - Action:
               - 's3:GetReplicationConfiguration'
               - 's3:ListBucket'
             Effect: Allow
             Resource:
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3Bucket
+              - !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
           - Action:
               - 's3:GetObjectVersion'
               - 's3:GetObjectVersionAcl'
             Effect: Allow
             Resource:
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3Bucket
-                  - /*
+              - !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
           - Action:
               - 's3:ReplicateObject'
               - 's3:ReplicateDelete'
             Effect: Allow
             Resource:
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Join
-                    - '-'
-                    - - !Ref 'AWS::Region'
-                      - !Ref 'AWS::StackName'
-                      - replicationbucket
-                  - /*
-      PolicyName: BucketBackupPolicy
-      Roles:
-        - !Ref S3BucketBackupRole
+              - !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
 
   CloudFront:
     DependsOn:
-      - S3Bucket
       - CloudFrontOAC
     Type: 'AWS::CloudFront::Distribution'
     Properties:
@@ -189,7 +196,7 @@ Resources:
         Enabled: true
         Origins:
           -
-            DomainName: !Sub "${S3Bucket}.s3.${AWS::Region}.amazonaws.com"
+            DomainName: !Sub "${Repository}-${AWS::AccountId}-${Partner}-${Stage}.s3.${AWS::Region}.amazonaws.com"
             Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
             S3OriginConfig:
               OriginAccessIdentity: ''
