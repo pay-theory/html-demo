@@ -80,7 +80,7 @@ else
 fi
 
 echo "Retrieving cloudwatch kms key" ;
-KMS_KEY_ID=$(aws --region="${TARGET_REGION}" ssm get-parameters --name "pt-keys-cloudwatch-sym-key" --output text --query "Parameters[0].Value")
+KMS_KEY_ID=$(aws --region="${TARGET_REGION}" ssm get-parameters --name pt-keys-"${PARTNER}"-cloudwatch-sym-key --output text --query "Parameters[0].Value")
 if [[ ${KMS_KEY_ID} != *"arn"* ]]
 then
     echo "Failed to retrieve cloudwatch kms key!"
