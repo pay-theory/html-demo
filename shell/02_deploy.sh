@@ -43,7 +43,18 @@ if [ "$STATUS" = "CREATE_COMPLETE" ]; then
 elif [ "$STATUS" = "UPDATE_COMPLETE" ]; then
   echo "The cloudformation stack set has been updated successfully"
 elif [ "$STATUS" = "UPDATE_IN_PROGRESS" ]; then
-  echo "The cloudformation stack set is currently being updated"
+  echo "The cloudformation stack set is currently being updated. Waiting for 30 seconds..."
+  sleep 30
+  STATUS=$(aws cloudformation describe-stacks --region "us-east-1" --stack-name "${SERVICE_NAME}"-distribution-"${PARTNER}"-"${STAGE}" --output text --query "Stacks[0].StackStatus")
+  if [ "$STATUS" = "UPDATE_IN_PROGRESS" ]; then
+    echo "Update still in progress after waiting. Exiting..."
+    exit 1
+  elif [ "$STATUS" = "UPDATE_COMPLETE" ]; then
+    echo "The cloudformation stack set has been updated successfully"
+  else
+    echo "The cloudformation stack failed to complete"
+    exit 1
+  fi
 else
   echo "The cloudformation stack failed to complete"
   exit 1
