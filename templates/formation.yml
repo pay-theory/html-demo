@@ -10,15 +10,15 @@ Parameters:
   Repository:
     Type: String
     Description: The repository you are deploying from.
-    Default: html-demo     
+    Default: html-demo
   TargetMode:
     Type: String
     Description: The Deployment Mode
     Default: standard
     AllowedValues:
-        - standard
-        - '-new'
-        - '-old'
+    - standard
+    - '-new'
+    - '-old'
   HostedZone:
     Type: String
     Description: v2 hosted zone
@@ -26,39 +26,43 @@ Parameters:
     Type: String
     Description: v2 certificate arn
 Conditions:
-    isStandard: !Equals [ !Ref TargetMode, standard]  
+  isStandard: !Equals [!Ref TargetMode, standard]
+  isProd:
+    Fn::Equals:
+    - Ref: Stage
+    - paytheory
 Resources:
 
   S3Bucket:
     DependsOn:
-      - S3BucketBackupRole
+    - S3BucketBackupRole
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
       BucketEncryption:
         ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: 'aws:kms'
-              KMSMasterKeyID: !Sub '{{resolve:ssm:pt-keys-${Partner}-s3-bucket-sym-key}}'
-            BucketKeyEnabled: true  
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: 'aws:kms'
+            KMSMasterKeyID: !Sub '{{resolve:ssm:pt-keys-${Partner}-s3-bucket-sym-key}}'
+          BucketKeyEnabled: true
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       MetricsConfigurations:
-        - Id: EntireBucket
+      - Id: EntireBucket
       LifecycleConfiguration:
         Rules:
-          - Id: NonCurrentRetention
-            Status: Enabled
-            ExpirationInDays: 365
-            NoncurrentVersionExpiration:
-              NewerNoncurrentVersions: 5
-              NoncurrentDays: 7
-            Transitions:
-              - TransitionInDays: 1
-                StorageClass: INTELLIGENT_TIERING
+        - Id: NonCurrentRetention
+          Status: Enabled
+          ExpirationInDays: 365
+          NoncurrentVersionExpiration:
+            NewerNoncurrentVersions: 5
+            NoncurrentDays: 7
+          Transitions:
+          - TransitionInDays: 1
+            StorageClass: INTELLIGENT_TIERING
       LoggingConfiguration:
         DestinationBucketName: !Sub 'partner-services-deployment-${Partner}-logging'
         LogFilePrefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
@@ -66,67 +70,77 @@ Resources:
         Status: Enabled
       ReplicationConfiguration:
         Role: !GetAtt
-          - S3BucketBackupRole
-          - Arn
+        - S3BucketBackupRole
+        - Arn
         Rules:
-          - Destination:
-              Bucket: !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
-              StorageClass: GLACIER
-            Id: Backup
-            Prefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
-            Status: Enabled
+        - Destination:
+            Bucket: !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
+            StorageClass: GLACIER
+          Id: Backup
+          Prefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+          Status: Enabled
+      Tags:
+      - Key: sprinto
+        Value:
+          Fn::If:
+          - isProd
+          - prod
+          - notprod
+      - Key: partner_stage
+        Value:
+          Fn::Sub: ${Partner}-${Stage}
     DeletionPolicy: Delete
 
   BucketPolicy:
     DependsOn:
-      - CloudFront
+    - CloudFront
     Type: 'AWS::S3::BucketPolicy'
     Properties:
       Bucket: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
       PolicyDocument:
         Statement:
-          - Sid: 'SecureTransport'
-            Action:
-              - 's3:*'
-            Effect: Deny
-            Principal: "*"
-            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
-            Condition:
-              Bool:
-                aws:SecureTransport: false
-          - Sid: 'AllowCloudFrontServicePrincipalReadOnly'
-            Effect: 'Allow'
-            Principal:
-              Service: 'cloudfront.amazonaws.com'
-            Action: 's3:GetObject'
-            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
-            Condition:
-              StringEquals:
-                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFront}'
-          - Sid: 'AllowPtGlobalCodebuildRole'
-            Action:
-              - 's3:GetObject'
-              - 's3:PutObject'
-            Effect: Allow
-            Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
-            Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/pt-global-codebuild-role'
+        - Sid: 'SecureTransport'
+          Action:
+          - 's3:*'
+          Effect: Deny
+          Principal: "*"
+          Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
+          Condition:
+            Bool:
+              aws:SecureTransport: false
+        - Sid: 'AllowCloudFrontServicePrincipalReadOnly'
+          Effect: 'Allow'
+          Principal:
+            Service: 'cloudfront.amazonaws.com'
+          Action: 's3:GetObject'
+          Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
+          Condition:
+            StringEquals:
+              'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFront}'
+        - Sid: 'AllowPtGlobalCodebuildRole'
+          Action:
+          - 's3:GetObject'
+          - 's3:PutObject'
+          Effect: Allow
+          Resource: !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}/*'
+          Principal:
+            AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/pt-global-codebuild-role'
 
   S3BucketBackupRole:
     DependsOn:
-      - BucketBackupManagedPolicy
+    - BucketBackupManagedPolicy
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action:
-              - 'sts:AssumeRole'
-            Effect: Allow
-            Principal:
-              Service:
-                - s3.amazonaws.com
+        - Action:
+          - 'sts:AssumeRole'
+          Effect: Allow
+          Principal:
+            Service:
+            - s3.amazonaws.com
       ManagedPolicyArns:
-        - !Ref BucketBackupManagedPolicy
+      - !Ref BucketBackupManagedPolicy
 
   BucketBackupManagedPolicy:
     Type: 'AWS::IAM::ManagedPolicy'
@@ -136,57 +150,51 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Action:
-              - 's3:GetReplicationConfiguration'
-              - 's3:ListBucket'
-            Effect: Allow
-            Resource:
-              - !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
-          - Action:
-              - 's3:GetObjectVersion'
-              - 's3:GetObjectVersionAcl'
-            Effect: Allow
-            Resource:
-              - !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
-          - Action:
-              - 's3:ReplicateObject'
-              - 's3:ReplicateDelete'
-            Effect: Allow
-            Resource:
-              - !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
+        - Action:
+          - 's3:GetReplicationConfiguration'
+          - 's3:ListBucket'
+          Effect: Allow
+          Resource:
+          - !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+        - Action:
+          - 's3:GetObjectVersion'
+          - 's3:GetObjectVersionAcl'
+          Effect: Allow
+          Resource:
+          - !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+        - Action:
+          - 's3:ReplicateObject'
+          - 's3:ReplicateDelete'
+          Effect: Allow
+          Resource:
+          - !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
 
   CloudFront:
     DependsOn:
-      - CloudFrontOAC
+    - CloudFrontOAC
     Type: 'AWS::CloudFront::Distribution'
     Properties:
       DistributionConfig:
         Aliases:
-          - !If [ 
-        isStandard, 
-        !Sub "${Partner}.html.example.${Stage}.com", 
-        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
+        - !If [isStandard, !Sub "${Partner}.html.example.${Stage}.com", !Sub "${Partner}${TargetMode}.html.example.${Stage}.com"]
         CustomErrorResponses:
-          -
-            ErrorCachingMinTTL: 10
-            ErrorCode: 400
-            ResponseCode: 200
-            ResponsePagePath: /index.html
-          -
-            ErrorCachingMinTTL: 10
-            ErrorCode: 403
-            ResponseCode: 200
-            ResponsePagePath: /index.html
-          -
-            ErrorCachingMinTTL: 10
-            ErrorCode: 404
-            ResponseCode: 200
-            ResponsePagePath: /index.html
+        - ErrorCachingMinTTL: 10
+          ErrorCode: 400
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+        - ErrorCachingMinTTL: 10
+          ErrorCode: 403
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+        - ErrorCachingMinTTL: 10
+          ErrorCode: 404
+          ResponseCode: 200
+          ResponsePagePath: /index.html
         DefaultCacheBehavior:
           AllowedMethods:
-            - GET
-            - HEAD
-            - OPTIONS
+          - GET
+          - HEAD
+          - OPTIONS
           TargetOriginId: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
           CachePolicyId: '{{resolve:ssm:pt-global-examples-cache}}'
           OriginRequestPolicyId: '{{resolve:ssm:pt-global-examples-origin}}'
@@ -195,13 +203,12 @@ Resources:
         IPV6Enabled: true
         Enabled: true
         Origins:
-          -
-            DomainName: !Sub "${Repository}-${AWS::AccountId}-${Partner}-${Stage}.s3.${AWS::Region}.amazonaws.com"
-            Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
-            S3OriginConfig:
-              OriginAccessIdentity: ''
-            OriginPath: !Sub '/${Stage}/${Partner}'
-            OriginAccessControlId: !Ref CloudFrontOAC
+        - DomainName: !Sub "${Repository}-${AWS::AccountId}-${Partner}-${Stage}.s3.${AWS::Region}.amazonaws.com"
+          Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
+          S3OriginConfig:
+            OriginAccessIdentity: ''
+          OriginPath: !Sub '/${Stage}/${Partner}'
+          OriginAccessControlId: !Ref CloudFrontOAC
         ViewerCertificate:
           AcmCertificateArn: !Sub '${CertificateArn}'
           MinimumProtocolVersion: TLSv1.2_2021
@@ -219,20 +226,16 @@ Resources:
 
   Route53:
     DependsOn:
-      - CloudFront
+    - CloudFront
     Type: 'AWS::Route53::RecordSetGroup'
     Properties:
       HostedZoneId: !Sub '${HostedZone}'
       RecordSets:
-        -
-          Name: !If [ 
-        isStandard, 
-        !Sub "${Partner}.html.example.${Stage}.com", 
-        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
-          Type: A
-          AliasTarget:
-            HostedZoneId: Z2FDTNDATAQYW2
-            DNSName: !GetAtt CloudFront.DomainName
+      - Name: !If [isStandard, !Sub "${Partner}.html.example.${Stage}.com", !Sub "${Partner}${TargetMode}.html.example.${Stage}.com"]
+        Type: A
+        AliasTarget:
+          HostedZoneId: Z2FDTNDATAQYW2
+          DNSName: !GetAtt CloudFront.DomainName
 
   CodeBuild:
     Type: AWS::CodeBuild::Project
@@ -247,66 +250,66 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: 'aws/codebuild/standard:6.0'
         EnvironmentVariables:
-          - Name: STAGE
-            Type: PLAINTEXT
-            Value: !Sub '${Stage}'
-          - Name: PARTNER
-            Type: PLAINTEXT
-            Value: !Sub '${Partner}' 
-          - Name: TARGET_MODE
-            Type: PLAINTEXT
-            Value: !Sub '${TargetMode}'  
-          - Name: DISTRIBUTION
-            Type: PLAINTEXT
-            Value: !Ref CloudFront
-          - Name: GITHUB_ACCESS_TOKEN
-            Type: PLAINTEXT
-            Value: !Sub '{{resolve:ssm:/automation/git-hub-access-token}}'
-          - Name: TARGET_REGION
-            Type: PLAINTEXT
-            Value: !Sub '${AWS::Region}'
+        - Name: STAGE
+          Type: PLAINTEXT
+          Value: !Sub '${Stage}'
+        - Name: PARTNER
+          Type: PLAINTEXT
+          Value: !Sub '${Partner}'
+        - Name: TARGET_MODE
+          Type: PLAINTEXT
+          Value: !Sub '${TargetMode}'
+        - Name: DISTRIBUTION
+          Type: PLAINTEXT
+          Value: !Ref CloudFront
+        - Name: GITHUB_ACCESS_TOKEN
+          Type: PLAINTEXT
+          Value: !Sub '{{resolve:ssm:/automation/git-hub-access-token}}'
+        - Name: TARGET_REGION
+          Type: PLAINTEXT
+          Value: !Sub '${AWS::Region}'
       Source:
         Type: CODEPIPELINE
-      TimeoutInMinutes: 20  
+      TimeoutInMinutes: 20
 
   CodePipeline:
     DependsOn:
-      - CodeBuild
+    - CodeBuild
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
       Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
       RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role}}'
       Stages:
-        - Name: Source
-          Actions:
-            - InputArtifacts: []
-              Name: Source
-              ActionTypeId:
-                Version: "1"
-                Owner: AWS
-                Category: Source
-                Provider: CodeStarSourceConnection
-              OutputArtifacts:
-                - Name: SourceArtifact
-              RunOrder: 1
-              Configuration:
-                ConnectionArn: !Sub '{{resolve:ssm:pt-global-github-connection}}'
-                FullRepositoryId: !Sub 'pay-theory/${Repository}'
-                BranchName: !If [ isStandard, !Sub '${Partner}-${Stage}', !Sub '${Partner}${TargetMode}-${Stage}' ]
-                OutputArtifactFormat: "CODE_ZIP"
-        - Name: Deploy
-          Actions:
-            - Name: !Sub 'cd-${Repository}-${Partner}-${Stage}'
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: "1"
-                Provider: CodeBuild
-              InputArtifacts:
-                - Name: SourceArtifact
-              Configuration:
-                ProjectName: !Ref CodeBuild
-              RunOrder: 1                
+      - Name: Source
+        Actions:
+        - InputArtifacts: []
+          Name: Source
+          ActionTypeId:
+            Version: "1"
+            Owner: AWS
+            Category: Source
+            Provider: CodeStarSourceConnection
+          OutputArtifacts:
+          - Name: SourceArtifact
+          RunOrder: 1
+          Configuration:
+            ConnectionArn: !Sub '{{resolve:ssm:pt-global-github-connection}}'
+            FullRepositoryId: !Sub 'pay-theory/${Repository}'
+            BranchName: !If [isStandard, !Sub '${Partner}-${Stage}', !Sub '${Partner}${TargetMode}-${Stage}']
+            OutputArtifactFormat: "CODE_ZIP"
+      - Name: Deploy
+        Actions:
+        - Name: !Sub 'cd-${Repository}-${Partner}-${Stage}'
+          ActionTypeId:
+            Category: Build
+            Owner: AWS
+            Version: "1"
+            Provider: CodeBuild
+          InputArtifacts:
+          - Name: SourceArtifact
+          Configuration:
+            ProjectName: !Ref CodeBuild
+          RunOrder: 1
       ArtifactStore:
         Type: S3
         Location: !Ref S3Bucket
@@ -315,4 +318,4 @@ Resources:
 Outputs:
   Renew:
     Description: Trigger to update/rebuild formation
-    Value: 'Mar 14 2022'                
+    Value: 'Mar 14 2022'
