@@ -16,46 +16,42 @@ Parameters:
     Description: The Deployment Mode
     Default: standard
     AllowedValues:
-      - standard
-      - '-new'
-      - '-old'
+    - standard
+    - '-new'
+    - '-old'
 Conditions:
-  isStandard: !Equals [ !Ref TargetMode, standard]
+  isStandard: !Equals [!Ref TargetMode, standard]
+  isProd:
+    Fn::Equals:
+    - Ref: Stage
+    - paytheory
 Resources:
   V2HostedZone:
     Type: AWS::Route53::HostedZone
     Properties:
-      Name: !If [
-        isStandard,
-        !Sub "${Partner}.html.example.${Stage}.com",
-        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
+      Name: !If [isStandard, !Sub "${Partner}.html.example.${Stage}.com", !Sub "${Partner}${TargetMode}.html.example.${Stage}.com"]
 
   V2Route53NSRecordUpdater:
     Type: Custom::NSRecordUpdater
     Properties:
       ServiceToken: !Sub '{{resolve:ssm:route53-recordset-updater-lambda-arn}}'
       DomainName: !Sub '${Stage}.com'
-      SubdomainName: !If [
-        isStandard,
-        !Sub "${Partner}.html.example.${Stage}.com",
-        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
+      SubdomainName: !If [isStandard, !Sub "${Partner}.html.example.${Stage}.com",
+        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com"]
       NameServersList: !GetAtt "V2HostedZone.NameServers"
 
   V2Certificate:
     Type: Custom::Certificate
     DependsOn:
-      - V2Route53NSRecordUpdater
+    - V2Route53NSRecordUpdater
     Properties:
       ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn}}'
-      DomainName: !If [
-        isStandard,
-        !Sub "${Partner}.html.example.${Stage}.com",
-        !Sub "${Partner}${TargetMode}.html.example.${Stage}.com" ]
+      DomainName: !If [isStandard, !Sub "${Partner}.html.example.${Stage}.com", !Sub "${Partner}${TargetMode}.html.example.${Stage}.com"]
 
   V2CertificateValidator:
     Type: Custom::CertificateValidator
     DependsOn:
-      - V2Certificate
+    - V2Certificate
     Properties:
       ServiceToken: !Sub '{{resolve:ssm:certificate-validator-lambda-arn}}'
       CertificateArn: !GetAtt V2Certificate.CertificateArn
