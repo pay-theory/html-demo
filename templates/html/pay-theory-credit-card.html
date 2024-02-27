@@ -102,7 +102,7 @@
                     // handle callbacks
                     myCreditCard.readyObserver((ready) => {
                         console.log("ready", ready);
-                        const paymentButton = document.getElementById("initiate-payment");
+                        const paymentButton = document.getElementById("submit-payment");
                         paymentButton.addEventListener("click", (e) => {
                             e.preventDefault();
                             const statusContainer = document.getElementById("result-text");
@@ -115,7 +115,7 @@
                     });
 
                     myCreditCard.validObserver((valid) => {
-                        const paymentButton = document.getElementById("initiate-payment");
+                        const paymentButton = document.getElementById("submit-payment");
                         console.log("valid client", valid);
                         if (valid) {
                             paymentButton.removeAttribute("disabled");
