@@ -114,6 +114,9 @@
                             const statusContainer = document.getElementById("result-text");
                             statusContainer.textContent = "";
                             statusContainer.appendChild(document.createTextNode("working"));
+                            e.preventDefault();
+                            const timingContainer = document.getElementById("timing-text");
+                            timingContainer.textContent = "";
                             // myCreditCard.initTransaction(AMOUNT);
                             // myCreditCard.initTransaction(AMOUNT, BUYER_OPTIONS);
                             myCreditCard.transact(TRANSACTING_PARAMETERS);
@@ -150,7 +153,7 @@
                         }
                     });
                     const completionListener = (transactionResult) => {
-                        const timingContainer = document.getElementById("timing");
+                        const timingContainer = document.getElementById("timing-text");
                         // Calculate the time difference when reaching a later point in your code
                         const currentTime = window.performance.now();
                         const elapsedTime = currentTime - startTime;
