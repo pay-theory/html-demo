@@ -22,7 +22,6 @@
                 </form>
             </div>
             <div id="result-text" />
-            <div id="timing-text" />
             <div><em>you must replace YOUR-API-KEY in the URL to load the SDK</em></div>
         </div>
         </div>
@@ -114,11 +113,6 @@
                             const statusContainer = document.getElementById("result-text");
                             statusContainer.textContent = "";
                             statusContainer.appendChild(document.createTextNode("working"));
-                            e.preventDefault();
-                            const timingContainer = document.getElementById("timing-text");
-                            timingContainer.textContent = "";
-                            // myCreditCard.initTransaction(AMOUNT);
-                            // myCreditCard.initTransaction(AMOUNT, BUYER_OPTIONS);
                             myCreditCard.transact(TRANSACTING_PARAMETERS);
                         });
                     });
@@ -153,19 +147,15 @@
                         }
                     });
                     const completionListener = (transactionResult) => {
-                        const timingContainer = document.getElementById("timing-text");
+                        console.log("Transaction result:", JSON.stringify(transactionResult));
                         // Calculate the time difference when reaching a later point in your code
                         const currentTime = window.performance.now();
                         const elapsedTime = currentTime - startTime;
                         console.log("Time elapsed (in milliseconds):", elapsedTime);
-                        timingContainer.textContent = "";
-                        timingContainer.appendChild(
-                            document.createTextNode(`Time elapsed: ${elapsedTime}`)
-                        );
                         const statusContainer = document.getElementById("result-text");
                         statusContainer.textContent = "";
                         statusContainer.appendChild(
-                            document.createTextNode(JSON.stringify(transactionResult))
+                            document.createTextNode(elapsedTime)
                         );
                         return JSON.stringify(transactionResult)
                     };
