@@ -29,10 +29,16 @@
                 </form>
             </div>
             <div id="result-text" />
+            <div id="timing" />
             <div><em>you must replace YOUR-API-KEY in the URL to load the SDK</em></div>
         </div>
         </div>
         <script type="text/javascript">
+            // Calculate the time when the current webpage started loading
+            const startTime = window.performance.now();
+
+
+
             // API KEY is required
             const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
@@ -57,7 +63,7 @@
 
             const AMOUNT = 5000
             const FEE_MODE = window.paytheory.MERCHANT_FEE;
-            const REQUIRE_CONFIRMATION = true
+            const REQUIRE_CONFIRMATION = false
             const STYLES = {
                 default: {
                     color: "black",
@@ -151,6 +157,15 @@
                         }
                     });
                     const completionListener = (transactionResult) => {
+                        const timingContainer = document.getElementById("timing");
+                        // Calculate the time difference when reaching a later point in your code
+                        const currentTime = window.performance.now();
+                        const elapsedTime = currentTime - startTime;
+                        console.log("Time elapsed (in milliseconds):", elapsedTime);
+                        timingContainer.textContent = "";
+                        timingContainer.appendChild(
+                            document.createTextNode(`Time elapsed: ${elapsedTime}`)
+                        );
                         const statusContainer = document.getElementById("result-text");
                         statusContainer.textContent = "";
                         statusContainer.appendChild(

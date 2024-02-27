@@ -102,3 +102,5 @@ else
     echo "Log group exists, associating kms key... "
     aws logs --region="${TARGET_REGION}" associate-kms-key --log-group-name "${CODEBUILD_LOG_GROUP_NAME}" --kms-key-id "${KMS_KEY_ID}"
 fi
+
+if ! [ -z ${DISTRIBUTION+x} ]; then aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" ; fi ;
