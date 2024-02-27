@@ -19,7 +19,12 @@
                     <div id="pay-theory-credit-card-number"></div>
                     <div id="pay-theory-credit-card-exp"></div>
                     <div id="pay-theory-credit-card-cvv"></div>
-                    <div id="pay-theory-credit-card-zip"></div> 
+                    <div id="pay-theory-credit-card-account-name"></div>
+                    <div id="pay-theory-credit-card-address-1"></div>
+                    <div id="pay-theory-credit-card-address-2"></div>
+                    <div id="pay-theory-credit-card-city"></div>
+                    <div id="pay-theory-credit-card-state"></div>
+                    <div id="pay-theory-credit-card-zip"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -28,93 +33,145 @@
         </div>
         </div>
         <script type="text/javascript">
-            const urlParams = new URLSearchParams(window.location.search)
             // API KEY is required
+            const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
-            const AMOUNT = 5000
+            console.log('apikey',API_KEY)
+
             const first_name = urlParams.get('first_name') ? urlParams.get('first_name') : 'Html'
             const last_name = urlParams.get('last_name') ? urlParams.get('last_name') : 'Demo'
-            const BUYER_OPTIONS = {
+
+            const PAYOR_INFO = {
                 first_name: first_name,
-                last_name: last_name
-            }
-            // optionally define custom styles for the input components text
+                last_name: last_name,
+                email: "abel@paytheory.com",
+                phone: "5135555555",
+                personal_address: {
+                    city: "Cincinnati",
+                    country: "USA",
+                    region: "OH",
+                    line1: "10549 Reading Rd",
+                    postal_code: "45241"
+                }
+            };
+
+            const AMOUNT = 5000
+            const FEE_MODE = window.paytheory.MERCHANT_FEE;
+            const REQUIRE_CONFIRMATION = true
             const STYLES = {
                 default: {
-                    color: 'black',
-                    fontSize: '14px'
+                    color: "black",
+                    fontSize: "14px"
                 },
                 success: {
-                    color: '#5cb85c',
-                    fontSize: '14px'
+                    color: "#5cb85c",
+                    fontSize: "14px"
                 },
                 error: {
-                    color: '#d9534f',
-                    fontSize: '14px'
+                    color: "#d9534f",
+                    fontSize: "14px"
                 }
+            };
+
+
+            // optionally provide custom tags to help track transactions
+            const PAYMENT_METADATA = {
+                "pay-theory-account-code": "123456",
+                "pay-theory-reference": "v2.22.0",
+                "pay-theory-receipt-description": "HTML SDK Testing",
+                "pay-theory-receipt": true
+                // "payment-parameters-name": "test-params"
+            };
+
+            // optionally provide custom metadata to help track SDK Sessions
+            const SESSION_METADATA = {
+                "test-metadata": "HTML SDK Testing"
+            };
+
+
+            const TRANSACTING_PARAMETERS = {
+                amount: AMOUNT,
+                payorInfo: PAYOR_INFO, // optional
+                metadata: PAYMENT_METADATA, // optional
+                feeMode: FEE_MODE, // optional
+                confirmation: REQUIRE_CONFIRMATION, // optional
+                accountCode: "123456", // optional
+                reference: "v2.22.0", // optional
+                sendReceipt: true, // optional
+                receiptDescription: "v2.12.0" // optional
             }
 
-            // optionally provide custom tags to help track purchases
-            const TAGS = {
-                'pay-theory-account-code': 'html-demo',
-                'pay-theory-reference': 'credit-card-number'
-            }
-            const FEE_MODE = window.paytheory.SURCHARGE
-
-
-            window.paytheory.create(
-                    API_KEY,
-                    STYLES,
-                    TAGS,
-                    FEE_MODE,
-                    'TEMPLATE_ENVIRONMENT')
-                .then(myCreditCard => {
-                    myCreditCard.mount()
+            window.paytheory
+                .create(API_KEY, STYLES, SESSION_METADATA, FEE_MODE)
+                .then((myCreditCard) => {
+                    myCreditCard.mount();
 
                     // handle callbacks
-                    myCreditCard.readyObserver(ready => {
-                        console.log('ready', ready)
-                        const paymentButton = document.getElementById('submit-payment')
-                        paymentButton
-                            .addEventListener("click", (e) => {
-                                e.preventDefault();
-                                const statusContainer = document.getElementById("result-text");
-                                statusContainer.textContent = "";
-                                statusContainer.appendChild(document.createTextNode("working"));
-                                myCreditCard.initTransaction(AMOUNT);
-                            });
+                    myCreditCard.readyObserver((ready) => {
+                        console.log("ready", ready);
+                        const paymentButton = document.getElementById("initiate-payment");
+                        paymentButton.addEventListener("click", (e) => {
+                            e.preventDefault();
+                            const statusContainer = document.getElementById("result-text");
+                            statusContainer.textContent = "";
+                            statusContainer.appendChild(document.createTextNode("working"));
+                            // myCreditCard.initTransaction(AMOUNT);
+                            // myCreditCard.initTransaction(AMOUNT, BUYER_OPTIONS);
+                            myCreditCard.transact(TRANSACTING_PARAMETERS);
+                        });
+                    });
 
-                    })
-
-
-                    // only needed when REQUIRE_CONFIRMATION is false
-                    myCreditCard.transactedObserver(transactionResult => {
-                        const statusContainer = document.getElementById("result-text");
-                        statusContainer.textContent = "";
-                        statusContainer.appendChild(
-                            document.createTextNode(JSON.stringify(transactionResult))
-                        );
-                    })
-
-                    myCreditCard.validObserver(valid => {
-                        const paymentButton = document.getElementById("submit-payment");
+                    myCreditCard.validObserver((valid) => {
+                        const paymentButton = document.getElementById("initiate-payment");
                         console.log("valid client", valid);
                         if (valid) {
                             paymentButton.removeAttribute("disabled");
-                        }
-                        else {
+                        } else {
                             paymentButton.setAttribute("disabled", "");
                         }
-                    })
+                    });
 
-                    myCreditCard.errorObserver(error => {
+                    myCreditCard.errorObserver((error) => {
                         const statusContainer = document.getElementById("result-text");
                         statusContainer.textContent = "";
                         if (error) {
                             statusContainer.appendChild(document.createTextNode(error));
                         }
-                    })
-                })
+                    });
+                    /**
+                     * optional
+                     * use the tokenObserver to handle confirmation step
+                     **/
+                    myCreditCard.tokenizeObserver((card) => {
+                        const confirmation =  `Are you sure you want to make a payment on ${card.brand} card beginning with ${card.first_six}`
+                        if (confirm(confirmation)) {
+                            myCreditCard.confirm();
+                        } else {
+                            myCreditCard.cancel();
+                        }
+                    });
+                    const completionListener = (transactionResult) => {
+                        const statusContainer = document.getElementById("result-text");
+                        statusContainer.textContent = "";
+                        statusContainer.appendChild(
+                            document.createTextNode(JSON.stringify(transactionResult))
+                        );
+                        return JSON.stringify(transactionResult)
+                    };
+                    myCreditCard.captureObserver(completionListener);
+                    myCreditCard.transactedObserver(completionListener);
+
+                    const cashListener = (transactionResult) => {
+                        const statusContainer = document.getElementById("result-text");
+                        statusContainer.textContent = "";
+                        statusContainer.appendChild(
+                            document.createTextNode(JSON.stringify(transactionResult))
+                        );
+
+                    };
+
+                    myCreditCard.cashObserver(cashListener);
+                });
         </script>
     </body>
 
