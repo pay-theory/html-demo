@@ -46,10 +46,10 @@ Resources:
             KMSMasterKeyID: !Sub '{{resolve:ssm:pt-keys-${Partner}-s3-bucket-sym-key}}'
           BucketKeyEnabled: true
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
       MetricsConfigurations:
       - Id: EntireBucket
       LifecycleConfiguration:
