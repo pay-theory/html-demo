@@ -278,6 +278,7 @@ Resources:
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
       Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
+      PipelineType: V2
       RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role}}'
       Stages:
       - Name: Source
