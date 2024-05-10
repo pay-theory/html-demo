@@ -16,9 +16,8 @@
         <div id="main">
             <div>
                 <form>
-                    <div id="pay-theory-credit-card-number"></div>
-                    <div id="pay-theory-credit-card-exp"></div>
-                    <div id="pay-theory-credit-card-cvv"></div>
+                    <div id="pay-theory-credit-card"></div>
+                    <div id="pay-theory-credit-card-zip"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -63,33 +62,38 @@
                 }
             })  
 
-            const transact = async () => {
+            const transact = async (e) => {
                 // Parameters that you will pass into the transact function. More details below.
                 const TRANSACTING_PARAMETERS = { 
                         amount: AMOUNT
                 }
+                e.preventDefault()
+                try {
+                    let result = await window.paytheory.transact(TRANSACTING_PARAMETERS)
                 
-                let result = await window.paytheory.transact(TRANSACTING_PARAMETERS)
-                
-                if (result.type === "SUCCESS") {
-                    const statusContainer = document.getElementById("result-text");
-                    statusContainer.textContent = "";
-                    statusContainer.appendChild(
-                        document.createTextNode("success")
-                    );
-                } else if (result.type === "FAILURE") {
-                    const statusContainer = document.getElementById("result-text");
-                    statusContainer.textContent = "";
-                    statusContainer.appendChild(
-                        document.createTextNode("failure")
-                    );
-                } else if (result.type === "ERROR") {
-                    const statusContainer = document.getElementById("result-text");
-                    statusContainer.textContent = "";
-                    statusContainer.appendChild(
-                        document.createTextNode("error")
-                    );
+                    if (result.type === "SUCCESS") {
+                        const statusContainer = document.getElementById("result-text");
+                        statusContainer.textContent = "";
+                        statusContainer.appendChild(
+                            document.createTextNode("success")
+                        );
+                    } else if (result.type === "FAILURE") {
+                        const statusContainer = document.getElementById("result-text");
+                        statusContainer.textContent = "";
+                        statusContainer.appendChild(
+                            document.createTextNode("failure")
+                        );
+                    } else if (result.type === "ERROR") {
+                        const statusContainer = document.getElementById("result-text");
+                        statusContainer.textContent = "";
+                        statusContainer.appendChild(
+                            document.createTextNode("error")
+                        );
+                    }
+                } catch (error) {
+                    console.log(error)
                 }
+                
             } 
         </script>
     </body>
