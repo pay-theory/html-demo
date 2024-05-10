@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <script src="TEMPLATE_URL"></script>
+        <script src="https://evolve.sdk.paytheorystudy.com/index.js"></script>
         <style>
             #main,
             form {
@@ -33,10 +33,7 @@
             const AMOUNT = 5000
             const first_name = urlParams.get('first_name') ? urlParams.get('first_name') : 'Html'
             const last_name = urlParams.get('last_name') ? urlParams.get('last_name') : 'Demo'
-            const BUYER_OPTIONS = {
-                first_name: first_name,
-                last_name: last_name
-            }
+
             // optionally define custom styles for the input components text
             const STYLES = {
                 default: {
@@ -52,65 +49,47 @@
                     fontSize: '14px'
                 }
             }
+            window.paytheory.payTheoryFields({
+                apiKey: API_KEY
+            })
 
-            // optionally provide custom tags to help track purchases
-            const TAGS = {}
-            const FEE_MODE = window.paytheory.SURCHARGE
+            const cleanupFunction = window.paytheory.validObserver(valid => {
+                if (valid.includes("card")) {
+                    document.getElementById('submit-payment').disabled = false
+					document.getElementById('submit-payment').onclick = transact
+				} else {
+					document.getElementById('submit-payment').disabled = true
+                }
+            })  
 
-
-            window.paytheory.create(
-                    API_KEY,
-                    STYLES,
-                    TAGS,
-                    FEE_MODE,
-                    'TEMPLATE_ENVIRONMENT')
-                .then(myCreditCard => {
-                    myCreditCard.mount()
-
-                    // handle callbacks
-                    myCreditCard.readyObserver(ready => {
-                        console.log('ready', ready)
-                        const paymentButton = document.getElementById('submit-payment')
-                        paymentButton
-                            .addEventListener("click", (e) => {
-                                e.preventDefault();
-                                const statusContainer = document.getElementById("result-text");
-                                statusContainer.textContent = "";
-                                statusContainer.appendChild(document.createTextNode("working"));
-                                myCreditCard.initTransaction(AMOUNT);
-                            });
-
-                    })
-
-
-                    // only needed when REQUIRE_CONFIRMATION is false
-                    myCreditCard.transactedObserver(transactionResult => {
-                        const statusContainer = document.getElementById("result-text");
-                        statusContainer.textContent = "";
-                        statusContainer.appendChild(
-                            document.createTextNode(JSON.stringify(transactionResult))
-                        );
-                    })
-
-                    myCreditCard.validObserver(valid => {
-                        const paymentButton = document.getElementById("submit-payment");
-                        console.log("valid client", valid);
-                        if (valid) {
-                            paymentButton.removeAttribute("disabled");
-                        }
-                        else {
-                            paymentButton.setAttribute("disabled", "");
-                        }
-                    })
-
-                    myCreditCard.errorObserver(error => {
-                        const statusContainer = document.getElementById("result-text");
-                        statusContainer.textContent = "";
-                        if (error) {
-                            statusContainer.appendChild(document.createTextNode(error));
-                        }
-                    })
-                })
+            const transact = async () => {
+                // Parameters that you will pass into the transact function. More details below.
+                const TRANSACTING_PARAMETERS = { 
+                        amount: AMOUNT
+                }
+                
+                let result = await window.paytheory.transact(TRANSACTING_PARAMETERS)
+                
+                if (result.type === "SUCCESS") {
+                    const statusContainer = document.getElementById("result-text");
+                    statusContainer.textContent = "";
+                    statusContainer.appendChild(
+                        document.createTextNode("success")
+                    );
+                } else if (result.type === "FAILURE") {
+                    const statusContainer = document.getElementById("result-text");
+                    statusContainer.textContent = "";
+                    statusContainer.appendChild(
+                        document.createTextNode("failure")
+                    );
+                } else if (result.type === "ERROR") {
+                    const statusContainer = document.getElementById("result-text");
+                    statusContainer.textContent = "";
+                    statusContainer.appendChild(
+                        document.createTextNode("error")
+                    );
+                }
+            } 
         </script>
     </body>
 
