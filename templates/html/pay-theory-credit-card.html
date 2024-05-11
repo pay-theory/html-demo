@@ -67,7 +67,19 @@
             const transact = async (e) => {
                 // Parameters that you will pass into the transact function. More details below.
                 const TRANSACTING_PARAMETERS = { 
-                        amount: AMOUNT
+                        amount: AMOUNT,
+                        billingInfo: {
+                            name:"Anon Resident",
+                            address: {
+                                line1:"123 Sesame St",
+                                city:"New York City",
+                                region:"New York",
+                                postal_code:"12345",
+                                country:"US",
+                                account_code:"123_1234"
+                            }
+                        },
+                        metadata: {"account_no":"12345","ehr_id":"41DCD97F-8223-6FE6-2C52-6FE6A5ADD469","ehr_source":"cpp","email_address":"anon@gmail.com","facility_id":"1234","health_type":"LAF","mobile_phone":"(123) 456-7890","org_id":"123","origin":"family-portal-authenticated","resident_id":"1234567","resident_name":"ANON RESIDENT"}
                 }
                 e.preventDefault()
                 try {
