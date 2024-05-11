@@ -23,7 +23,7 @@
                     <div><input id="submit-payment" type="submit"/></div>
                 </form>
             </div>
-            <div id="result-text"></div>
+            <div id="result-text">_</div>
             <div><em>you must replace YOUR-API-KEY in the URL to load the SDK</em></div>
         </div>
         </div>
@@ -59,16 +59,18 @@
                 if (valid.includes("ach")) {
                     document.getElementById('submit-payment').disabled = false
 					document.getElementById('submit-payment').onclick = transact
+                    document.getElementById('result-text').append(createTextNode("ready"))
 				} else {
 					document.getElementById('submit-payment').disabled = true
                 }
-            })  
+            })           
 
             const errCleanupFunction =  window.paytheory.errorObserver(error => {
                 document.getElementById('result-text').append(createTextNode(error))
             })            
 
             const transact = async (e) => {
+                document.getElementById('result-text').append(createTextNode("working"))
                 // Parameters that you will pass into the transact function. More details below.
                 const TRANSACTING_PARAMETERS = { 
                         amount: AMOUNT,

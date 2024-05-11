@@ -63,10 +63,7 @@
 				} else {
 					document.getElementById('submit-payment').disabled = true
                 }
-            })  
-            const stateCleanupFunction =  window.paytheory.errorObserver(error => {
-                document.getElementById('result-text').append(createTextNode(error))
-            })             
+            })           
 
             const errCleanupFunction =  window.paytheory.errorObserver(error => {
                 document.getElementById('result-text').append(createTextNode(error))
