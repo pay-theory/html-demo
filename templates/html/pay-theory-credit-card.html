@@ -31,8 +31,8 @@
             // API KEY is required
             const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
-            console.log('apikey',API_KEY)
-            const AMOUNT = 5000
+
+            const AMOUNT = 5000 + Math.floor(Math.random() * 5000)
             const first_name = urlParams.get('first_name') ? urlParams.get('first_name') : 'Html'
             const last_name = urlParams.get('last_name') ? urlParams.get('last_name') : 'Demo'
 
@@ -69,7 +69,7 @@
                 const TRANSACTING_PARAMETERS = { 
                         amount: AMOUNT,
                         billingInfo: {
-                            name:"Anon Resident",
+                            name:`${first_name} ${last_name}`,
                             address: {
                                 line1:"123 Sesame St",
                                 city:"New York City",

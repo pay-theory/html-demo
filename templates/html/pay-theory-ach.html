@@ -20,7 +20,6 @@
                     <div id="pay-theory-ach-account-number"></div>
                     <div id="pay-theory-ach-routing-number"></div>
                     <div id="pay-theory-ach-account-type"></div>
-                    <div id="pay-theory-ach-bank-code"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -29,16 +28,14 @@
         </div>
         </div>
         <script type="text/javascript">
-            const urlParams = new URLSearchParams(window.location.search)
             // API KEY is required
+            const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
-            const AMOUNT = 5000
+
+            const AMOUNT = 5000 + Math.floor(Math.random() * 5000)
             const first_name = urlParams.get('first_name') ? urlParams.get('first_name') : 'Html'
             const last_name = urlParams.get('last_name') ? urlParams.get('last_name') : 'Demo'
-            const BUYER_OPTIONS = {
-                first_name: first_name,
-                last_name: last_name
-            }
+
             // optionally define custom styles for the input components text
             const STYLES = {
                 default: {
@@ -54,68 +51,64 @@
                     fontSize: '14px'
                 }
             }
+            window.paytheory.payTheoryFields({
+                apiKey: API_KEY
+            })
 
-            // optionally provide custom tags to help track purchases
-            const TAGS = {
-                'pay-theory-account-code': 'html-demo',
-                'pay-theory-reference': 'ach-bank-account'
-            }
-            const FEE_MODE = window.paytheory.SURCHARGE
+            const cleanupFunction = window.paytheory.validObserver(valid => {
+                if (valid.includes("card")) {
+                    document.getElementById('submit-payment').disabled = false
+					document.getElementById('submit-payment').onclick = transact
+				} else {
+					document.getElementById('submit-payment').disabled = true
+                }
+            })  
 
-
-            window.paytheory.create(
-                    API_KEY,
-                    STYLES,
-                    TAGS,
-                    FEE_MODE,
-                    'TEMPLATE_ENVIRONMENT')
-                .then(myCreditCard => {
-                    myCreditCard.mount()
-
-                    // handle callbacks
-                    myCreditCard.readyObserver(ready => {
-                        console.log('ready', ready)
-                        const paymentButton = document.getElementById('submit-payment')
-                        paymentButton
-                            .addEventListener("click", (e) => {
-                                e.preventDefault();
-                                const statusContainer = document.getElementById("result-text");
-                                statusContainer.textContent = "";
-                                statusContainer.appendChild(document.createTextNode("working"));
-                                myCreditCard.initTransaction(AMOUNT);
-                            });
-
-                    })
-
-
-                    // only needed when REQUIRE_CONFIRMATION is false
-                    myCreditCard.transactedObserver(transactionResult => {
+            const transact = async (e) => {
+                // Parameters that you will pass into the transact function. More details below.
+                const TRANSACTING_PARAMETERS = { 
+                        amount: AMOUNT,
+                        billingInfo: {
+                            name:`${first_name} ${last_name}`,
+                            address: {
+                                line1:"123 Sesame St",
+                                city:"New York City",
+                                region:"New York",
+                                postal_code:"12345",
+                                country:"US",
+                                account_code:"123_1234"
+                            }
+                        },
+                        metadata: {"account_no":"12345","ehr_id":"41DCD97F-8223-6FE6-2C52-6FE6A5ADD469","ehr_source":"cpp","email_address":"anon@gmail.com","facility_id":"1234","health_type":"LAF","mobile_phone":"(123) 456-7890","org_id":"123","origin":"family-portal-authenticated","resident_id":"1234567","resident_name":"ANON RESIDENT"}
+                }
+                e.preventDefault()
+                try {
+                    let result = await window.paytheory.transact(TRANSACTING_PARAMETERS)
+                
+                    if (result.type === "SUCCESS") {
                         const statusContainer = document.getElementById("result-text");
                         statusContainer.textContent = "";
                         statusContainer.appendChild(
-                            document.createTextNode(JSON.stringify(transactionResult))
+                            document.createTextNode("success")
                         );
-                    })
-
-                    myCreditCard.validObserver(valid => {
-                        const paymentButton = document.getElementById("submit-payment");
-                        console.log("valid client", valid);
-                        if (valid) {
-                            paymentButton.removeAttribute("disabled");
-                        }
-                        else {
-                            paymentButton.setAttribute("disabled", "");
-                        }
-                    })
-
-                    myCreditCard.errorObserver(error => {
+                    } else if (result.type === "FAILURE") {
                         const statusContainer = document.getElementById("result-text");
                         statusContainer.textContent = "";
-                        if (error) {
-                            statusContainer.appendChild(document.createTextNode(error));
-                        }
-                    })
-                })
+                        statusContainer.appendChild(
+                            document.createTextNode("failure")
+                        );
+                    } else if (result.type === "ERROR") {
+                        const statusContainer = document.getElementById("result-text");
+                        statusContainer.textContent = "";
+                        statusContainer.appendChild(
+                            document.createTextNode("error")
+                        );
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
+                
+            } 
         </script>
     </body>
 
