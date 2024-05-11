@@ -16,6 +16,7 @@
         <div id="main">
             <div>
                 <form>
+                    <div id="pay-theory-credit-card-account-name"></div>
                     <div id="pay-theory-credit-card-number"></div>
                     <div id="pay-theory-credit-card-exp"></div>
                     <div id="pay-theory-credit-card-cvv"></div>
@@ -56,20 +57,23 @@
             })
 
             const cleanupFunction = window.paytheory.validObserver(valid => {
-                if (valid.includes("ach")) {
+                if (valid.includes("card")) {
                     document.getElementById('submit-payment').disabled = false
 					document.getElementById('submit-payment').onclick = transact
+                    document.getElementById('result-text').textContent = "";
                     document.getElementById('result-text').append(document.createTextNode("ready"))
 				} else {
 					document.getElementById('submit-payment').disabled = true
                 }
-            })           
+            }) 
 
             const errCleanupFunction =  window.paytheory.errorObserver(error => {
+                document.getElementById('result-text').textContent = "";
                 document.getElementById('result-text').append(document.createTextNode(error))
             })            
 
             const transact = async (e) => {
+                document.getElementById('result-text').textContent = "";
                 document.getElementById('result-text').append(document.createTextNode("working"))
                 // Parameters that you will pass into the transact function. More details below.
                 const TRANSACTING_PARAMETERS = { 

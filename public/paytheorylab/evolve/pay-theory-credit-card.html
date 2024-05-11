@@ -16,12 +16,15 @@
         <div id="main">
             <div>
                 <form>
-                    <div id="pay-theory-credit-card"></div>
+                    <div id="pay-theory-credit-card-account-name"></div>
+                    <div id="pay-theory-credit-card-number"></div>
+                    <div id="pay-theory-credit-card-exp"></div>
+                    <div id="pay-theory-credit-card-cvv"></div>
                     <div id="pay-theory-credit-card-zip"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
-            <div id="result-text" />
+            <div id="result-text">_</div>
             <div><em>you must replace YOUR-API-KEY in the URL to load the SDK</em></div>
         </div>
         </div>
@@ -29,8 +32,8 @@
             // API KEY is required
             const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
-            console.log('apikey',API_KEY)
-            const AMOUNT = 5000
+
+            const AMOUNT = 5000 + Math.floor(Math.random() * 5000)
             const first_name = urlParams.get('first_name') ? urlParams.get('first_name') : 'Html'
             const last_name = urlParams.get('last_name') ? urlParams.get('last_name') : 'Demo'
 
@@ -57,15 +60,36 @@
                 if (valid.includes("card")) {
                     document.getElementById('submit-payment').disabled = false
 					document.getElementById('submit-payment').onclick = transact
+                    document.getElementById('result-text').textContent = "";
+                    document.getElementById('result-text').append(document.createTextNode("ready"))
 				} else {
 					document.getElementById('submit-payment').disabled = true
                 }
-            })  
+            }) 
+
+            const errCleanupFunction =  window.paytheory.errorObserver(error => {
+                document.getElementById('result-text').textContent = "";
+                document.getElementById('result-text').append(document.createTextNode(error))
+            })            
 
             const transact = async (e) => {
+                document.getElementById('result-text').textContent = "";
+                document.getElementById('result-text').append(document.createTextNode("working"))
                 // Parameters that you will pass into the transact function. More details below.
                 const TRANSACTING_PARAMETERS = { 
-                        amount: AMOUNT
+                        amount: AMOUNT,
+                        billingInfo: {
+                            name:`${first_name} ${last_name}`,
+                            address: {
+                                line1:"123 Sesame St",
+                                city:"New York City",
+                                region:"New York",
+                                postal_code:"12345",
+                                country:"US",
+                                account_code:"123_1234"
+                            }
+                        },
+                        metadata: {"account_no":"12345","ehr_id":"41DCD97F-8223-6FE6-2C52-6FE6A5ADD469","ehr_source":"cpp","email_address":"anon@gmail.com","facility_id":"1234","health_type":"LAF","mobile_phone":"(123) 456-7890","org_id":"123","origin":"family-portal-authenticated","resident_id":"1234567","resident_name":"ANON RESIDENT"}
                 }
                 e.preventDefault()
                 try {
@@ -91,6 +115,11 @@
                         );
                     }
                 } catch (error) {
+                    const statusContainer = document.getElementById("result-text");
+                    statusContainer.textContent = "";
+                    statusContainer.appendChild(
+                        document.createTextNode(error)
+                    );
                     console.log(error)
                 }
                 
