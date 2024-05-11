@@ -59,6 +59,7 @@
                 if (valid.includes("ach")) {
                     document.getElementById('submit-payment').disabled = false
 					document.getElementById('submit-payment').onclick = transact
+                    document.getElementById('result-text').append(createTextNode("ready"))
 				} else {
 					document.getElementById('submit-payment').disabled = true
                 }
