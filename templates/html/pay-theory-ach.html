@@ -64,6 +64,10 @@
                 }
             })  
 
+            const errCleanupFunction =  window.paytheory.errorObserver(error => {
+                document.getElementById('result-text').append(createTextNode(error))
+            })            
+
             const transact = async (e) => {
                 // Parameters that you will pass into the transact function. More details below.
                 const TRANSACTING_PARAMETERS = { 
@@ -105,6 +109,11 @@
                         );
                     }
                 } catch (error) {
+                    const statusContainer = document.getElementById("result-text");
+                    statusContainer.textContent = "";
+                    statusContainer.appendChild(
+                        document.createTextNode(error)
+                    );
                     console.log(error)
                 }
                 
