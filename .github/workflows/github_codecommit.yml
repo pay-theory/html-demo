@@ -32,7 +32,7 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Sync up to CodeCommit
+      - name: Install AWS
         run: |
           apt-get update && \
           apt-get install -y \
@@ -44,6 +44,9 @@ jobs:
           && pip3 install --upgrade pip \
           && apt-get clean		
           pip3 --no-cache-dir install --upgrade awscli          
+      
+      - name: Sync up to CodeCommit
+        run: |		  
           git config --global --add safe.directory /github/workspace
           git config --global credential.'https://git-codecommit.*.amazonaws.com'.helper '!aws codecommit credential-helper $@'
           git config --global credential.UseHttpPath true
