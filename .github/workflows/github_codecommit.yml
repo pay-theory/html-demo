@@ -33,6 +33,21 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Sync up to CodeCommit
-        run:
-          using: 'docker'
-          image: './Dockerfile'
+        run: |
+          apt-get update && \
+          apt-get install -y \
+          python3 \
+          python3-pip \
+          python3-setuptools \
+          groff \
+          less \
+          && pip3 install --upgrade pip \
+          && apt-get clean		
+          pip3 --no-cache-dir install --upgrade awscli          
+          git config --global --add safe.directory /github/workspace
+          git config --global credential.'https://git-codecommit.*.amazonaws.com'.helper '!aws codecommit credential-helper $@'
+          git config --global credential.UseHttpPath true
+          git remote add sync "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/${GITHUB_REPOSITORY}"
+        # run:
+        #   using: 'docker'
+        #   image: './Dockerfile'
