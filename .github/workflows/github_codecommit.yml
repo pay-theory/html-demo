@@ -20,20 +20,32 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Git clone the repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
-          role-to-assume: arn:aws:iam::805600764437:role/GitHubSync #change to reflect your IAM role’s ARN
+          role-to-assume: <arn:aws:iam::111122223333:role/GitHubAction-AssumeRoleWithAction> #change to reflect your IAM role’s ARN
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
+      # Hello from AWS: WhoAmI
+      - name: Sts GetCallerIdentity
+        run: |
+          aws sts get-caller-identity
+    #   - name: Checkout
+    #     uses: actions/checkout@v3
+    #     with:
+    #       fetch-depth: 0
 
-      - name: Sync up to CodeCommit
-        uses: pay-theory/sync-up-to-codecommit-action@v1
-        with:
-          repository_name: html-demo
-          aws_region: us-east-1
+    #   - name: configure aws credentials
+    #     uses: aws-actions/configure-aws-credentials@v1.7.0
+    #     with:
+    #       role-to-assume: arn:aws:iam::805600764437:role/GitHubSync #change to reflect your IAM role’s ARN
+    #       role-session-name: GitHub_to_AWS_via_FederatedOIDC
+    #       aws-region: ${{ env.AWS_REGION }}
+
+    #   - name: Sync up to CodeCommit
+    #     uses: pay-theory/sync-up-to-codecommit-action@v1
+    #     with:
+    #       repository_name: html-demo
+    #       aws_region: us-east-1
