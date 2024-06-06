@@ -29,8 +29,13 @@
         </div>
         </div>
         <script type="text/javascript">
+			let lineCount = 0
 			const appendLine = (line) => {
-				return createElement('p').appendChild(document.createTextNode(line))
+				lineCount = lineCount + 1
+				_div = document.createElement('div');
+				_div['data-testid']= 'result-line-' + lineCount;
+				_div.appendChild(document.createTextNode(line))
+				return div
 			}
             // API KEY is required
             const urlParams = new URLSearchParams(window.location.search)
