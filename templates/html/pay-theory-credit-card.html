@@ -33,7 +33,7 @@
 			const appendLine = (line,line_type) => {
 				lineCount = lineCount + 1
 				_div = document.createElement('div');
-				_div['data-testid']= 'result-line-' + line_type;
+				_div.setAttribute('data-testid', 'result-line-' + line_type);
 				_div.appendChild(document.createTextNode(line))
 				return _div
 			}
