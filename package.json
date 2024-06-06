@@ -4,7 +4,7 @@
   "description": "a demonstration of Pay Theory's JavaScript SDK in simple HTML",
   "main": "index.html",
   "scripts": {
-    "build": "sh shell/build_env.sh"
+    "build": "sh shell/build_env.sh evolve paytheorystudy"
   },
   "repository": {
     "type": "git",
