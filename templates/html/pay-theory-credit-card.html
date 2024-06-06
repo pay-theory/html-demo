@@ -9,9 +9,14 @@
                 flex-direction: column;
                 justify-content: flex-start;
             }
-			#main div {
+			#forms {
 				display: flex;
                 flex-direction: row;
+                justify-content: flex-start;
+			}
+			#result-text {
+                display: flex;
+                flex-direction: column;
                 justify-content: flex-start;
 			}
         </style>
@@ -40,7 +45,7 @@
 
     <body>
         <div id="main">
-            <div>
+            <div id="forms">
                 <form>
                     <div id="pay-theory-credit-card-account-name"></div>
                     <div id="pay-theory-credit-card-number"></div>
@@ -49,15 +54,17 @@
                     <div id="pay-theory-credit-card-zip"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
-                <div>
-                    <div id="amount"><input id="amount-in" type="text"></div>
-                    <div id="first-name"><input id="first-name-in" type="text"></div>
-                    <div id="last-name"><input id="last-name-in" type="text"></div>
-                    <div id="billing-address-1"><input id="billing-address-1-in" type="text"></div>
-                    <div id="billing-city"><input id="billing-city-in" type="text"></div>
-					<div id="billing-state"><input id="billing-state-in" type="text"></div>
-					<div id="billing-zip"><input id="billing-zip-in" type="text"></div>
-				</div>				
+                <form>
+                    <div id="amount"><input id="amount-in" type="text"> (amount)</div>
+                    <div id="billingInfo-first_name"><input id="billingInfo-first_name-in" type="text"> (first name)</div>
+                    <div id="billingInfo-last_name"><input id="billingInfo-last_name-in" type="text"> (last name)</div>
+                    <div id="billingInfo-address-line1"><input id="billingInfo-address-line1-in" type="text"> (address)</div>
+                    <div id="billingInfo-address-city"><input id="billingInfo-address-city-in" type="text"> (city)</div>
+					<div id="billingInfo-address-region"><input id="billingInfo-address-region-in" type="text"> (region/state)</div>
+					<div id="billingInfo-address-postal_code"><input id="billingInfo-address-postal_code-in" type="text"> (zip/postal code)</div>
+					<div id="billingInfo-address-account_code"><input id="billingInfo-address-account_code-in" type="text"> (account code)</div>
+                    <div id="metadata"><textarea id="metadata-in"></textarea> (metadata)</div>
+				</form>				
             </div>
             <div id="result-text"></div>
             <div><em>you must replace YOUR-API-KEY in the URL to load the SDK</em></div>
@@ -66,18 +73,36 @@
 
 		<script type="text/javascript">
 			const prepElement = (element) => {
-				document.getElementById(`${element}-in`).value = TRANSACTING_PARAMETERS[element]
+				let selector = element.split("-")
+				let value = TRANSACTING_PARAMETERS
+				while (selector.length > 0) {
+					let selected = selector.shift()
+					if (selected === "metadata") {
+						value = JSON.stringify(value[selected])
+					} else {
+						value = value[selected]
+					}					
+				}
+				document.getElementById(`${element}-in`).value = value
 				document.getElementById(`${element}-in`).onchange = (e) => {
-					TRANSACTING_PARAMETERS[element] = e.target.value
+					let selecting = element.split("-")
+					let variable = TRANSACTING_PARAMETERS
+					while (selector.length > 1) {
+						let selected = shift(selecting)
+						variable = variable[selected]
+					}					
+					variable[selecting] = e.target.value
 				}
 			}
 			prepElement("amount")
-			prepElement("first-name")
-			prepElement("last-name")
-			prepElement("billing-address-1")
-			prepElement("billing-city")
-			prepElement("billing-state")
-			prepElement("billing-zip")
+			prepElement("billingInfo-first_name")
+			prepElement("billingInfo-last_name")
+			prepElement("billingInfo-address-line1")
+			prepElement("billingInfo-address-city")
+			prepElement("billingInfo-address-region")
+			prepElement("billingInfo-address-postal_code")
+			prepElement("billingInfo-address-account_code")
+			prepElement("metadata")
 			let lineCount = 0
 			const appendLine = (line,line_type) => {
 				lineCount = lineCount + 1
@@ -117,7 +142,7 @@
 					document.getElementById('submit-payment').onclick = transact
                     // document.getElementById('result-text').textContent = "";
 					let lineType = "ready"
-                    document.getElementById('result-text').append(appendLine(lineType),lineType)
+                    document.getElementById('result-text').append(appendLine(lineType,lineType))
 				} else {
 					document.getElementById('submit-payment').disabled = true
                 }
@@ -130,7 +155,7 @@
 
             const transact = async (e) => {
                 // document.getElementById('result-text').textContent = "";
-                document.getElementById('result-text').append(appendLine("transact"),"transact")
+                document.getElementById('result-text').append(appendLine("transact","transact"))
 
                 e.preventDefault()
                 try {
