@@ -29,6 +29,9 @@
         </div>
         </div>
         <script type="text/javascript">
+			const appendLine = (line) => {
+				return createElement('p').appendChild(document.createTextNode(line))
+			}
             // API KEY is required
             const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
@@ -61,7 +64,7 @@
                     document.getElementById('submit-payment').disabled = false
 					document.getElementById('submit-payment').onclick = transact
                     // document.getElementById('result-text').textContent = "";
-                    document.getElementById('result-text').append(document.createTextNode("ready"))
+                    document.getElementById('result-text').append(appendLine("ready"))
 				} else {
 					document.getElementById('submit-payment').disabled = true
                 }
@@ -74,7 +77,7 @@
 
             const transact = async (e) => {
                 // document.getElementById('result-text').textContent = "";
-                document.getElementById('result-text').append(document.createTextNode("working"))
+                document.getElementById('result-text').append(appendLine("working"))
                 // Parameters that you will pass into the transact function. More details below.
                 const TRANSACTING_PARAMETERS = { 
                         amount: AMOUNT,
@@ -100,26 +103,26 @@
                         const statusContainer = document.getElementById("result-text");
                         // statusContainer.textContent = "";
                         statusContainer.appendChild(
-                            document.createTextNode("success")
+                            appendLine("success")
                         );
                     } else if (result.type === "FAILED") {
                         const statusContainer = document.getElementById("result-text");
                         // statusContainer.textContent = "";
                         statusContainer.appendChild(
-                            document.createTextNode("failure")
+                            appendLine("failure")
                         );
                     } else if (result.type === "ERROR") {
                         const statusContainer = document.getElementById("result-text");
                         // statusContainer.textContent = "";
                         statusContainer.appendChild(
-                            document.createTextNode("error")
+                            appendLine("error")
                         );
                     }
                 } catch (error) {
                     const statusContainer = document.getElementById("result-text");
                     // statusContainer.textContent = "";
                     statusContainer.appendChild(
-                        document.createTextNode(error)
+						appendLine(error)
                     );
                     console.log(error)
                 }
