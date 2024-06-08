@@ -277,6 +277,7 @@ Resources:
     - CodeBuild
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
+      PipelineType: V2
       Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
       RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role}}'
       Stages:
