@@ -20,6 +20,7 @@ sed 's#TEMPLATE_URL#'"$SDK_URL"'#g' templates/html/pay-theory-credit-card-number
 sed 's#TEMPLATE_URL#'"$SDK_URL"'#g' templates/html/pay-theory-ach.html | sed 's/TEMPLATE_ENVIRONMENT/'"$ENVIRONMENT"'/g' > public/"$STAGE"/"$PARTNER"/pay-theory-ach.html
 sed 's#TEMPLATE_URL#'"$SDK_URL"'#g' templates/html/pay-theory-barcode.html | sed 's/TEMPLATE_ENVIRONMENT/'"$ENVIRONMENT"'/g' > public/"$STAGE"/"$PARTNER"/pay-theory-barcode.html
 sed 's#TEMPLATE_URL#'"$SDK_URL"'#g' templates/html/pay-theory-qrcode.html | sed 's/TEMPLATE_ENVIRONMENT/'"$ENVIRONMENT"'/g' > public/"$STAGE"/"$PARTNER"/pay-theory-qrcode.html
+sed 's#TEMPLATE_URL#'"$SDK_URL"'#g' templates/html/pay-theory-button.html | sed 's/TEMPLATE_ENVIRONMENT/'"$ENVIRONMENT"'/g' > public/"$STAGE"/"$PARTNER"/pay-theory-button.html
 
 # copy in root html file
 cp index.html public/"$STAGE"/"$PARTNER"/.
