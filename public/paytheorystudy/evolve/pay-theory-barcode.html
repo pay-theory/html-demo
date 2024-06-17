@@ -148,7 +148,28 @@
             const errCleanupFunction =  window.paytheory.errorObserver(error => {
                 // document.getElementById('result-text').textContent = "";
                 document.getElementById('result-text').append(appendLine(`error: ${error}`,"error"))
-            })            
+            })  
+
+            const cashListener = (transactionResult) => {
+                console.log('cashListener');
+                console.log(JSON.stringify(transactionResult));
+                const statusContainer = document.getElementById("result-text")
+                statusContainer.textContent = ""
+                const barcodeFrame = document.createElement("iframe")
+                barcodeFrame.height = "300px"
+                barcodeFrame.width = "100%"
+                barcodeFrame.src = transactionResult.barcodeUrl
+                barcodeFrame.frameBorder = "0"
+                const barcodeLink = document.createElement("a")
+                barcodeLink.appendChild(document.createTextNode('Link to Barcode'))
+                barcodeLink.href = transactionResult.barcodeUrl
+                barcodeLink.target = "_blank"
+                barcodeLink.rel = "noopener noreferrer"
+                statusContainer.appendChild(barcodeFrame)
+                statusContainer.appendChild(barcodeLink)
+            }
+
+            window.paytheory.cashObserver(cashListener)
 
             const transact = async (e) => {
                 // document.getElementById('result-text').textContent = "";
