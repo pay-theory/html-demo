@@ -91,7 +91,11 @@
 						let selected = shift(selecting)
 						variable = variable[selected]
 					}					
-					variable[selecting] = e.target.value
+					if (element === "amount") {
+                        variable[selecting[0]] = parseInt(e.target.value, 10)
+                    } else {
+                        variable[selecting[0]] = e.target.value
+                    }	
 				}
 			}
 			prepElement("amount")
