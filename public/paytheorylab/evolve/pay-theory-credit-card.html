@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <script src="TEMPLATE_URL"></script>
+        <script src="https://evolve.sdk.paytheorylab.com/index.js"></script>
         <style>
             #main,
             form {
@@ -16,10 +16,11 @@
         <div id="main">
             <div>
                 <form>
-                    <div id="pay-theory-ach-account-name"></div>
-                    <div id="pay-theory-ach-account-number"></div>
-                    <div id="pay-theory-ach-routing-number"></div>
-                    <div id="pay-theory-ach-account-type"></div>
+                    <div id="pay-theory-credit-card-account-name"></div>
+                    <div id="pay-theory-credit-card-number"></div>
+                    <div id="pay-theory-credit-card-exp"></div>
+                    <div id="pay-theory-credit-card-cvv"></div>
+                    <div id="pay-theory-credit-card-zip"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
             </div>
@@ -56,7 +57,7 @@
             })
 
             const cleanupFunction = window.paytheory.validObserver(valid => {
-                if (valid.includes("ach")) {
+                if (valid.includes("card")) {
                     document.getElementById('submit-payment').disabled = false
 					document.getElementById('submit-payment').onclick = transact
                     document.getElementById('result-text').textContent = "";
@@ -100,7 +101,7 @@
                         statusContainer.appendChild(
                             document.createTextNode("success")
                         );
-                    } else if (result.type === "FAILED") {
+                    } else if (result.type === "FAILURE") {
                         const statusContainer = document.getElementById("result-text");
                         statusContainer.textContent = "";
                         statusContainer.appendChild(

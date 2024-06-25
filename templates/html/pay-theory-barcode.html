@@ -47,11 +47,8 @@
         <div id="main">
             <div id="forms">
                 <form>
-                    <div id="pay-theory-credit-card-account-name"></div>
-                    <div id="pay-theory-credit-card-number"></div>
-                    <div id="pay-theory-credit-card-exp"></div>
-                    <div id="pay-theory-credit-card-cvv"></div>
-                    <div id="pay-theory-credit-card-zip"></div>
+                    <div id="pay-theory-cash-name"></div>
+                    <div id="pay-theory-cash-contact"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
                 <form>
@@ -114,7 +111,7 @@
             // API KEY is required
             const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
-
+            
 
 
             // optionally define custom styles for the input components text
@@ -137,7 +134,7 @@
             })
 
             const cleanupFunction = window.paytheory.validObserver(valid => {
-                if (valid.includes("card")) {
+                if (valid.includes("cash")) {
                     document.getElementById('submit-payment').disabled = false
 					document.getElementById('submit-payment').onclick = transact
                     // document.getElementById('result-text').textContent = "";
@@ -151,7 +148,28 @@
             const errCleanupFunction =  window.paytheory.errorObserver(error => {
                 // document.getElementById('result-text').textContent = "";
                 document.getElementById('result-text').append(appendLine(`error: ${error}`,"error"))
-            })            
+            })  
+
+            const cashListener = (transactionResult) => {
+                console.log('cashListener');
+                console.log(JSON.stringify(transactionResult));
+                const statusContainer = document.getElementById("result-text")
+                statusContainer.textContent = ""
+                const barcodeFrame = document.createElement("iframe")
+                barcodeFrame.height = "300px"
+                barcodeFrame.width = "100%"
+                barcodeFrame.src = transactionResult.barcodeUrl
+                barcodeFrame.frameBorder = "0"
+                const barcodeLink = document.createElement("a")
+                barcodeLink.appendChild(document.createTextNode('Link to Barcode'))
+                barcodeLink.href = transactionResult.barcodeUrl
+                barcodeLink.target = "_blank"
+                barcodeLink.rel = "noopener noreferrer"
+                statusContainer.appendChild(barcodeFrame)
+                statusContainer.appendChild(barcodeLink)
+            }
+
+            window.paytheory.cashObserver(cashListener)
 
             const transact = async (e) => {
                 // document.getElementById('result-text').textContent = "";
