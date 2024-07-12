@@ -90,8 +90,14 @@
 					while (selector.length > 1) {
 						let selected = shift(selecting)
 						variable = variable[selected]
-					}					
-					variable[selecting] = e.target.value
+					}
+                    if (element === "amount") {
+                        variable[selecting] = parseInt(e.target.value, 10)
+                    }
+                    else{
+                        variable[selecting] = e.target.value
+                    }			
+					
 				}
 			}
 			prepElement("amount")

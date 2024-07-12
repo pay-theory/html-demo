@@ -88,7 +88,11 @@
 						let selected = shift(selecting)
 						variable = variable[selected]
 					}					
-					variable[selecting] = e.target.value
+					if (element === "amount") {
+                        variable[selecting] = parseInt(e.target.value, 10)
+                    } else {
+                        variable[selecting] = e.target.value
+                    }	
 				}
 			}
 			prepElement("amount")
@@ -160,13 +164,25 @@
                 barcodeFrame.width = "100%"
                 barcodeFrame.src = transactionResult.barcodeUrl
                 barcodeFrame.frameBorder = "0"
+                const mapFrame = document.createElement("iframe")
+                mapFrame.height = "300px"
+                mapFrame.width = "100%"
+                mapFrame.src = transactionResult.mapUrl
+                mapFrame.frameBorder = "0"
                 const barcodeLink = document.createElement("a")
+                const mapLink = document.createElement("a")
                 barcodeLink.appendChild(document.createTextNode('Link to Barcode'))
+                mapLink.appendChild(document.createTextNode('Link to map'))
                 barcodeLink.href = transactionResult.barcodeUrl
+                mapLink.href = transactionResult.mapUrl
                 barcodeLink.target = "_blank"
+                mapLink.target = "_blank"
                 barcodeLink.rel = "noopener noreferrer"
+                mapLink.rel = "noopener noreferrer"
                 statusContainer.appendChild(barcodeFrame)
+                statusContainer.appendChild(mapFrame)
                 statusContainer.appendChild(barcodeLink)
+                statusContainer.appendChild(mapLink)
             }
 
             window.paytheory.cashObserver(cashListener)
