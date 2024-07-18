@@ -112,8 +112,8 @@
 				document.getElementById(`${element}-in`).onchange = (e) => {
 					let selecting = element.split("-")
 					let variable = TRANSACTING_PARAMETERS
-					while (selector.length > 1) {
-						let selected = shift(selecting)
+					while (selecting.length > 1) {
+						let selected = selecting.shift()
 						variable = variable[selected]
 					}
                     if (element === "amount") {
