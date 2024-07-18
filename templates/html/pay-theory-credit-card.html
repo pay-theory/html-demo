@@ -82,7 +82,7 @@
                     <div id="payorInfo-personal_address-line1"><input id="payorInfo-personal_address-line1-in" type="text"> (payor address1)</div>
                     <div id="payorInfo-personal_address-line2"><input id="payorInfo-personal_address-line2-in" type="text"> (payor address2)</div>
 					<div id="payorInfo-personal_address-postal_code"><input id="payorInfo-personal_address-postal_code-in" type="text"> (payor zip/postal code)</div>
-					<div id="accountCode"><input id="accountCode" type="text"> (account code)</div>
+					<div id="accountCode"><input id="accountCode-in" type="text"> (account code)</div>
                     <div id="billingInfo-name"><input id="billingInfo-name-in" type="text"> (billing name)</div>
                     <div id="billingInfo-address-line1"><input id="billingInfo-address-line1-in" type="text"> (billing address)</div>
                     <div id="billingInfo-address-city"><input id="billingInfo-address-city-in" type="text"> (billing city)</div>
@@ -143,7 +143,7 @@
 			prepElement("billingInfo-address-region")
 			prepElement("billingInfo-address-postal_code")
 			prepElement("metadata")
-            
+
 			let lineCount = 0
 			const appendLine = (line,line_type) => {
 				lineCount = lineCount + 1
