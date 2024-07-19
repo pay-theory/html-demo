@@ -1,0 +1,62 @@
+<html>
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Payement Page</title>
+        <style>
+            a {
+              font-size: 12px;
+              text-align: center;
+            }
+          </style>
+        <script src="TEMPLATE_URL"></script>
+        <script type="text/javascript">
+			// API KEY is required
+            const urlParams = new URLSearchParams(window.location.search)
+            const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
+            
+            const AMOUNT = 5000
+
+            // Variable for testing
+            const versionNumber = "v2.22.0"
+
+            const METADATA = {"account_no":"12345","ehr_id":"41DCD97F-8223-6FE6-2C52-6FE6A5ADD469","ehr_source":"cpp","email_address":"anon@gmail.com","facility_id":"1234","health_type":"LAF","mobile_phone":"(123) 456-7890","org_id":"123","origin":"family-portal-authenticated","resident_id":"1234567","resident_name":"ANON RESIDENT"}
+
+            const QR_PARAMS = { 
+                paymentName: "SDK QR Code Payment Test",
+                amount: AMOUNT, 
+                metadata: METADATA, // optional 
+                feeMode: paytheory.SERVICE_FEE, // optional - SERVICE_FEE or MERCHANT_FEE
+                accountCode: "123456", // optional 
+                reference: versionNumber, // optional
+                acceptedPaymentMethods: paytheory.ALL,
+                callToAction: paytheory.PAY,
+                requirePhone: true
+            }
+
+            paytheory.qrCode({
+                apiKey: API_KEY,
+                checkoutDetails: QR_PARAMS,
+                size: 200,
+                onError: error => console.log(error),
+                onReady: ready => console.log("ready"),
+                onSuccess: success => {
+                    console.log("success", success)
+                  }
+            })
+		</script>		
+    </head>
+
+    <body>
+        <div id="main">
+            <div>
+                <div id="pay-theory-checkout-qr"></div>
+            </div>
+            <div id="result-text" />
+        </div>
+        </div>
+    </body>
+
+</html>

@@ -202,6 +202,7 @@ Resources:
         HttpVersion: http2
         IPV6Enabled: true
         Enabled: true
+        DefaultRootObject: !Sub "/${Stage}/${Partner}/index.html"
         Origins:
         - DomainName: !Sub "${Repository}-${AWS::AccountId}-${Partner}-${Stage}.s3.${AWS::Region}.amazonaws.com"
           Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
@@ -277,6 +278,7 @@ Resources:
     - CodeBuild
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
+      PipelineType: V2
       Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
       RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role}}'
       Stages:
