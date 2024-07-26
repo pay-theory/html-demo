@@ -102,3 +102,27 @@ else
     echo "Log group exists, associating kms key... "
     aws logs --region="${TARGET_REGION}" associate-kms-key --log-group-name "${CODEBUILD_LOG_GROUP_NAME}" --kms-key-id "${KMS_KEY_ID}"
 fi
+
+
+##################### GIT Recreation of branch ############################
+
+if [[ $TARGET_MODE = "standard" ]]
+then
+    MODE=""
+else
+    MODE=$TARGET_MODE
+fi
+
+# if we do not have the branch in remote create it
+existed_in_remote=$(git ls-remote --heads origin "${PARTNER}""${MODE}"-"${STAGE}" 2>/dev/null)
+if [[ -z ${existed_in_remote} ]]
+then
+    git fetch -p
+    echo "Recreating branch ${PARTNER}${MODE}-${STAGE} from current branch"
+    git checkout -b "${PARTNER}""${MODE}"-"${STAGE}"
+    git push -u origin "${PARTNER}""${MODE}"-"${STAGE}"
+#end if we do not have the branch in remote create it
+fi
+
+##########################################################################
+
