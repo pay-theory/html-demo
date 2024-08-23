@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Secure Tags Library Deployment
+Parameters:
+  Partner:
+    Type: String
+    Description: The environment you're deploying to.
+  Stage:
+    Type: String
+    Description: Library stage to use.
+  Repository:
+    Type: String
+    Description: The repository you are deploying from.
+    Default: html-demo
+  TargetMode:
+    Type: String
+    Description: The Deployment Mode
+    Default: standard
+    AllowedValues:
+    - standard
+    - '-new'
+    - '-old'
+  HostedZone:
+    Type: String
+    Description: v2 hosted zone
+  CertificateArn:
+    Type: String
+    Description: v2 certificate arn
+Conditions:
+  isStandard: !Equals [!Ref TargetMode, standard]
+  isProd:
+    Fn::Equals:
+    - Ref: Stage
+    - paytheory
+Resources:
+  S3BucketBackupRole:
+    DependsOn:
+    - BucketBackupManagedPolicy
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub '${Repository}-${Partner}-${Stage}-role'
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - 'sts:AssumeRole'
+          Effect: Allow
+          Principal:
+            Service:
+            - s3.amazonaws.com
+      ManagedPolicyArns:
+      - !Ref BucketBackupManagedPolicy
+
+  BucketBackupManagedPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      Description: !Sub 'Policy for ${Repository}-${Partner}-${Stage}'
+      ManagedPolicyName: !Sub '${Repository}-${Partner}-${Stage}-backup'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action:
+          - 's3:GetReplicationConfiguration'
+          - 's3:ListBucket'
+          Effect: Allow
+          Resource:
+          - !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+        - Action:
+          - 's3:GetObjectVersion'
+          - 's3:GetObjectVersionAcl'
+          Effect: Allow
+          Resource:
+          - !Sub 'arn:aws:s3:::${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
+        - Action:
+          - 's3:ReplicateObject'
+          - 's3:ReplicateDelete'
+          Effect: Allow
+          Resource:
+          - !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'

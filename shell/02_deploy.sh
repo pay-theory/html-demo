@@ -21,6 +21,44 @@ echo "S3_ARTIFACTS_PATH :: $S3_ARTIFACTS_PATH"
 echo "Validating the cfn templates $(date) in $(pwd)" ;
 aws cloudformation validate-template --template-body file://templates/formation.yml ;
 
+
+# Deploying the global stack
+GLOBAL_STACK_NAME="${SERVICE_NAME}-global-${PARTNER}-${STAGE}"
+
+# Check if the target region is us-east-1
+if [ "$TARGET_REGION" == "us-east-1" ]; then
+  # Global Stack Deployment
+  GLOBAL_TEMPLATE="./templates/global.yml"
+  GLOBAL_PARAMETERS="ParameterKey=Partner,ParameterValue=${PARTNER} ParameterKey=Stage,ParameterValue=${STAGE} ParameterKey=TargetMode,ParameterValue=${TARGET_MODE}"
+  
+  aws cloudformation deploy --template-file ./templates/global.yml \
+    --stack-name "${GLOBAL_STACK_NAME}" \
+    --region "${TARGET_REGION}" \
+    --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+    --no-fail-on-empty-changeset \
+    --parameter-overrides \
+    Partner="${PARTNER}" \
+    Stage="${STAGE}" \
+    TargetMode="${TARGET_MODE}"
+
+  # Check the status of cloudformation stack set
+  STATUS=$(aws cloudformation describe-stacks --stack-name "${GLOBAL_STACK_NAME}" --output text --query "Stacks[0].StackStatus")
+  if [ "$STATUS" = "CREATE_COMPLETE" ]; then
+    echo "The cloudformation stack set has been created successfully"
+  elif [ "$STATUS" = "UPDATE_COMPLETE" ]; then
+    echo "The cloudformation stack set has been updated successfully"
+  elif [ "$STATUS" = "UPDATE_IN_PROGRESS" ]; then
+    echo "The cloudformation stack set is currently being updated"
+  else
+    echo "The cloudformation stack failed to complete"
+    exit 1
+  fi
+fi
+
+# Getting outputs from the global stack
+GLOBAL_OUTPUTS=$(aws cloudformation describe-stacks --region us-east-1 --stack-name $GLOBAL_STACK_NAME --query "Stacks[0].Outputs")
+
+
 aws s3 cp public s3://html-demo-"${TARGET_ACCOUNT_ID}"-"${PARTNER}"-"${STAGE}" --recursive
 
 
