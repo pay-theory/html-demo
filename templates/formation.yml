@@ -74,7 +74,7 @@ Resources:
         - Arn
         Rules:
         - Destination:
-            Bucket: !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-${AWS::AccountId}-${AWS::Region}-backups'
+            Bucket: !Sub 'arn:aws:s3:::partner-services-${Partner}-${AWS::AccountId}-${AWS::Region}-backups'
             StorageClass: GLACIER
           Id: Backup
           Prefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
@@ -167,7 +167,7 @@ Resources:
           - 's3:ReplicateDelete'
           Effect: Allow
           Resource:
-          - !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-${AWS::AccountId}-${AWS::Region}-backups'
+          - !Sub 'arn:aws:s3:::partner-services-${Partner}-${AWS::AccountId}-${AWS::Region}-backups'
 
   CloudFront:
     DependsOn:
