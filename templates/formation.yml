@@ -64,7 +64,7 @@ Resources:
           - TransitionInDays: 1
             StorageClass: INTELLIGENT_TIERING
       LoggingConfiguration:
-        DestinationBucketName: !Sub 'partner-services-deployment-${Partner}-logging'
+        DestinationBucketName: !Sub 'partner-services-deployment-${AWS::AccountId}-${Partner}-logging'
         LogFilePrefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
       VersioningConfiguration:
         Status: Enabled
