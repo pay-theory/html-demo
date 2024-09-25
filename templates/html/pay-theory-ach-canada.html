@@ -29,6 +29,7 @@
             const phone = '78906543677'
 			const TRANSACTING_PARAMETERS = { 
 					amount: AMOUNT,
+                    oneTimeUseToken: true,
 					billingInfo: {
 						name: `${billing_name}`,
 						address: {
@@ -63,10 +64,11 @@
         <div id="main">
             <div id="forms">
                 <form>
-                    <div id="pay-theory-ach-account-name"></div>
-                    <div id="pay-theory-ach-account-number"></div>
-                    <div id="pay-theory-ach-routing-number"></div>
-                    <div id="pay-theory-ach-account-type"></div>
+                    <div id="pay-theory-bank-account-name"></div>
+                    <div id="pay-theory-bank-account-number"></div>
+                    <div id="pay-theory-bank-institution-number"></div>
+                    <div id="pay-theory-bank-transit-number"></div>
+                    <div id="pay-theory-bank-account-type"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
                 <form>
@@ -167,7 +169,8 @@
                 }
             }
             window.paytheory.payTheoryFields({
-                apiKey: API_KEY
+                apiKey: API_KEY,
+                country: "CAN"
             })
 
             const cleanupFunction = window.paytheory.validObserver(valid => {

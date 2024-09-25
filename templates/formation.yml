@@ -64,7 +64,7 @@ Resources:
           - TransitionInDays: 1
             StorageClass: INTELLIGENT_TIERING
       LoggingConfiguration:
-        DestinationBucketName: !Sub 'partner-services-deployment-${Partner}-logging'
+        DestinationBucketName: !Sub 'partner-services-deployment-${AWS::AccountId}-${Partner}-logging'
         LogFilePrefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
       VersioningConfiguration:
         Status: Enabled
@@ -74,7 +74,7 @@ Resources:
         - Arn
         Rules:
         - Destination:
-            Bucket: !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
+            Bucket: !Sub 'arn:aws:s3:::partner-services-${Partner}-${AWS::AccountId}-${AWS::Region}-backups'
             StorageClass: GLACIER
           Id: Backup
           Prefix: !Sub '${Repository}-${AWS::AccountId}-${Partner}-${Stage}'
@@ -167,7 +167,7 @@ Resources:
           - 's3:ReplicateDelete'
           Effect: Allow
           Resource:
-          - !Sub 'arn:aws:s3:::partner-services-deployment-${Partner}-backups'
+          - !Sub 'arn:aws:s3:::partner-services-${Partner}-${AWS::AccountId}-${AWS::Region}-backups'
 
   CloudFront:
     DependsOn:
@@ -202,6 +202,7 @@ Resources:
         HttpVersion: http2
         IPV6Enabled: true
         Enabled: true
+        DefaultRootObject: !Sub "/${Stage}/${Partner}/index.html"
         Origins:
         - DomainName: !Sub "${Repository}-${AWS::AccountId}-${Partner}-${Stage}.s3.${AWS::Region}.amazonaws.com"
           Id: !Sub 'paytheory-sdk-example-${Partner}-${Stage}'
@@ -277,6 +278,7 @@ Resources:
     - CodeBuild
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
+      PipelineType: V2
       Name: !Sub 'cb-${Repository}-${Partner}-${Stage}'
       RoleArn: !Sub '{{resolve:ssm:pt-global-codepipeline-role}}'
       Stages:

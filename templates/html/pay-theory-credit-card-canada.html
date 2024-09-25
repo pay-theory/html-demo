@@ -63,10 +63,11 @@
         <div id="main">
             <div id="forms">
                 <form>
-                    <div id="pay-theory-ach-account-name"></div>
-                    <div id="pay-theory-ach-account-number"></div>
-                    <div id="pay-theory-ach-routing-number"></div>
-                    <div id="pay-theory-ach-account-type"></div>
+                    <div id="pay-theory-credit-card-account-name"></div>
+                    <div id="pay-theory-credit-card-number"></div>
+                    <div id="pay-theory-credit-card-exp"></div>
+                    <div id="pay-theory-credit-card-cvv"></div>
+                    <div id="pay-theory-credit-card-zip"></div>
                     <div><input id="submit-payment" type="submit" disabled/></div>
                 </form>
                 <form>
@@ -117,9 +118,11 @@
 					}
                     if (element === "amount") {
                         variable[selecting] = parseInt(e.target.value, 10)
-                    } else {
+                    }
+                    else{
                         variable[selecting] = e.target.value
-                    }					
+                    }			
+					
 				}
 			}
 			prepElement("amount")
@@ -140,6 +143,7 @@
 			prepElement("billingInfo-address-region")
 			prepElement("billingInfo-address-postal_code")
 			prepElement("metadata")
+
 			let lineCount = 0
 			const appendLine = (line,line_type) => {
 				lineCount = lineCount + 1
@@ -151,6 +155,9 @@
             // API KEY is required
             const urlParams = new URLSearchParams(window.location.search)
             const API_KEY = urlParams.get('api_key') ? urlParams.get('api_key') : 'NO_API_KEY_PROVIDED'
+
+
+
             // optionally define custom styles for the input components text
             const STYLES = {
                 default: {
@@ -167,11 +174,12 @@
                 }
             }
             window.paytheory.payTheoryFields({
-                apiKey: API_KEY
+                apiKey: API_KEY,
+                country: "CAN"
             })
 
             const cleanupFunction = window.paytheory.validObserver(valid => {
-                if (valid.includes("ach")) {
+                if (valid.includes("card")) {
                     document.getElementById('submit-payment').disabled = false
 					document.getElementById('submit-payment').onclick = transact
                     // document.getElementById('result-text').textContent = "";
