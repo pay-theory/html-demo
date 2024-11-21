@@ -32,8 +32,23 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Install AWS
+        run: |
+          apt-get update && \
+          apt-get install -y \
+          python3 \
+          python3-pip \
+          python3-setuptools \
+          groff \
+          less \
+          && pip3 install --upgrade pip \
+          && apt-get clean		
+          pip3 --no-cache-dir install --upgrade awscli          
+      
       - name: Sync up to CodeCommit
-        uses: pay-theory/sync-up-to-codecommit-action@v1
-        with:
-          repository_name: html-demo
-          aws_region: us-east-1
+        run: |		  
+          git config --global --add safe.directory /github/workspace
+          git config --global credential.'https://git-codecommit.*.amazonaws.com'.helper '!aws codecommit credential-helper $@'
+          git config --global credential.UseHttpPath true
+          git remote add sync "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/${GITHUB_REPOSITORY}"
+          git push sync --mirror
