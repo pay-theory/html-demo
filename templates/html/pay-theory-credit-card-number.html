@@ -20,7 +20,10 @@
                     <div id="pay-theory-credit-card-exp"></div>
                     <div id="pay-theory-credit-card-cvv"></div>
                     <div id="pay-theory-credit-card-zip"></div> 
-                    <div><input id="submit-payment" type="submit" disabled/></div>
+                    <div>
+                        <input id="submit-payment" type="submit" value="Submit Payment" disabled/>
+                        <input id="tokenize-payment" type="submit" value="Tokenize" disabled/>
+                    </div>
                 </form>
             </div>
             <div id="result-text" />
@@ -98,12 +101,26 @@
 
                     myCreditCard.validObserver(valid => {
                         const paymentButton = document.getElementById("submit-payment");
+                        const tokenizeButton = document.getElementById("tokenize-payment");
                         console.log("valid client", valid);
                         if (valid) {
                             paymentButton.removeAttribute("disabled");
+                            tokenizeButton.removeAttribute("disabled");
+                            tokenizeButton.addEventListener("click", (e) => {
+                                e.preventDefault();
+                                const statusContainer = document.getElementById("result-text");
+                                statusContainer.textContent = "";
+                                statusContainer.appendChild(document.createTextNode("tokenizing..."));
+                                
+                                // Note: The older API doesn't have direct tokenization method
+                                // This would need the newer payTheoryFields API
+                                statusContainer.textContent = "";
+                                statusContainer.appendChild(document.createTextNode("Tokenization requires the newer API. Please update to use payTheoryFields."));
+                            });
                         }
                         else {
                             paymentButton.setAttribute("disabled", "");
+                            tokenizeButton.setAttribute("disabled", "");
                         }
                     })
 
