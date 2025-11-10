@@ -320,4 +320,4 @@ Resources:
 Outputs:
   Renew:
     Description: Trigger to update/rebuild formation
-    Value: 'Sept 20 2023'
+    Value: 'Sept 20 2025'
